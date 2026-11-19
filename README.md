@@ -6,8 +6,9 @@ ranges supplied in a CSV and record the results in another CSV.
 
 ## Status
 
-The project is at the architecture stage. No automation, transaction queue,
-retry policy, or export functionality has been implemented yet.
+The project has a basic development setup. No automation, transaction queue,
+retry policy, configuration loader, or export functionality has been
+implemented yet.
 
 ## Proposed approach
 
@@ -43,3 +44,50 @@ not real passwords or personal information.
 
 The automation and CSV formats have not been implemented yet. A later
 automation may adapt the framework to a portal with structured business data.
+
+## Project layout
+
+- `robot/tasks/`: future high-level Robot Framework tasks.
+- `robot/resources/`: future reusable Robot keywords and portal interactions.
+- `src/py_reframework/`: future Python data and transaction logic.
+- `tests/`: future automated tests.
+- `output/`: generated results and reports; excluded from Git.
+
+The `.gitkeep` files keep empty folders in Git until they contain project files.
+
+## Development setup
+
+These commands are for PowerShell on Windows with Python 3.11 or newer and
+Windows x64. From the repository root, create a virtual environment and install
+the dependencies:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+The Browser Library batteries package includes the Node.js runtime, so a
+separate Node.js installation is not needed. Install its Chromium browser:
+
+```powershell
+$env:PLAYWRIGHT_BROWSERS_PATH = (Join-Path (Get-Location) '.venv\ms-playwright')
+.\.venv\Scripts\python.exe -m Browser.entry install chromium
+```
+
+Set `PLAYWRIGHT_BROWSERS_PATH` in each new terminal before running future
+browser automation, so it uses the browser installed in this virtual
+environment. The installation downloads browser files. See the
+[Browser Library installation guide](https://robotframework-browser.org/docs/start/installation/)
+for other platforms and setup options.
+
+Verify the tools:
+
+```powershell
+.\.venv\Scripts\python.exe -m robot --version
+.\.venv\Scripts\python.exe -m pytest --version
+.\.venv\Scripts\python.exe -m pip check
+```
+
+The `.env.example` file lists placeholder credential names. The project does
+not load `.env` files yet; do not put real passwords or personal data in the
+demo portal or commit credentials.
