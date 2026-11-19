@@ -1,0 +1,6 @@
+setting,value
+portal_url,https://hash-chandra.github.io/demowebapp/
+input_csv,../data/transactions.csv
+output_dir,../output
+max_retries,2
+retry_delay_seconds,5
