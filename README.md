@@ -6,9 +6,9 @@ ranges supplied in a CSV and record the results in another CSV.
 
 ## Status
 
-The project has a basic development setup. No automation, transaction queue,
-retry policy, configuration loader, or export functionality has been
-implemented yet.
+The project has a development setup, a CSV settings loader, and Python failure
+types. No browser automation, transaction queue, retry policy, or export
+functionality has been implemented yet.
 
 ## Proposed approach
 
@@ -49,11 +49,44 @@ automation may adapt the framework to a portal with structured business data.
 
 - `robot/tasks/`: future high-level Robot Framework tasks.
 - `robot/resources/`: future reusable Robot keywords and portal interactions.
-- `src/py_reframework/`: future Python data and transaction logic.
-- `tests/`: future automated tests.
+- `config/settings.csv`: non-secret settings for the planned bot.
+- `src/py_reframework/`: Python configuration and failure types; future data
+  and transaction logic.
+- `tests/`: automated tests for Python components.
 - `output/`: generated results and reports; excluded from Git.
 
 The `.gitkeep` files keep empty folders in Git until they contain project files.
+
+## Configuration and failure types
+
+`config/settings.csv` has `setting,value` columns. It defines the portal URL,
+input CSV path, output directory, maximum retries, and delay between retries.
+Paths are resolved relative to the settings file's directory. The loader
+validates the settings format, URL, paths, and integer ranges (0-10 retries and
+0-300 seconds); it does not create paths or check that input data exists.
+`max_retries` means additional attempts after the first attempt. The settings
+do not implement retries by themselves.
+
+Python code can call `load_settings` from `py_reframework.config` and use the
+returned `Settings` object. `ConfigurationError` is a `SystemFailure`;
+`BusinessRuleError` represents an invalid transaction, and
+`TransientSystemError` identifies a potentially retryable technical failure.
+These types do not yet define how Robot handles failures across its Python
+boundary.
+
+For Python commands outside pytest, make `src` available for imports in the
+current PowerShell session:
+
+```powershell
+$env:PYTHONPATH = (Join-Path (Get-Location) 'src')
+```
+
+Run the configuration tests from the repository root (pytest configures its own
+import path):
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest tests\test_config.py
+```
 
 ## Development setup
 
