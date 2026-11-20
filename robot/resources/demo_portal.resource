@@ -11,7 +11,9 @@ Open Demo Portal
     New Browser    chromium    headless=${HEADLESS}
     Set Suite Variable    ${BROWSER_OPEN}    ${True}
     New Context    acceptDownloads=${True}
-    New Page    ${portal_url}
+    New Page
+    ${status}=    Go To    ${portal_url}
+    RETURN    ${status}
 
 Log In To Demo Portal
     Click    ${LOGIN_LINK}
@@ -40,13 +42,13 @@ Download Demo Statement
     Click    data-testid=download-statement
     ${result}=    Wait For    ${download}
     Should Be Equal    ${result}[state]    finished
-    Verify Demo Statement    ${result}[saveAs]    ${start_date}    ${end_date}
     RETURN    ${result}[saveAs]
 
 Finish Browser Session
     IF    ${BROWSER_OPEN}
         Run Keyword If Test Failed    Capture Failure Evidence
         Close Browser    ALL
+        Set Suite Variable    ${BROWSER_OPEN}    ${False}
     END
 
 Capture Failure Evidence

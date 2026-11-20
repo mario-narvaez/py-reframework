@@ -44,6 +44,8 @@ def test_repository_settings_load() -> None:
     path = Path(__file__).resolve().parents[1] / "config" / "settings.csv"
     settings = load_settings(path)
     assert settings.portal_url == "https://hash-chandra.github.io/demowebapp/"
+    assert settings.max_retries == 1
+    assert settings.retry_delay_seconds == 5
 
 
 @pytest.mark.parametrize(

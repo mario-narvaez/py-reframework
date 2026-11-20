@@ -9,7 +9,8 @@ for date ranges supplied in a CSV and records the results in another CSV.
 
 The project can process CSV date ranges, download and verify simulated
 statements, and write a results CSV. An individual statement task is also
-available. Automatic retries and restart recovery are not implemented.
+available. The batch retries selected temporary portal errors. Restarting an
+interrupted batch is not implemented.
 
 ## From this demo to other solutions
 
@@ -50,7 +51,7 @@ No project module is guaranteed to work unchanged for every solution. Reuse
 must be verified, especially when an automation changes external data: retries
 and restart rules for an update may differ from those for a download. The
 current CSV transaction processing is specific to this demo and has not been
-proven across solutions; recovery is not yet implemented.
+proven across solutions; interrupted-run recovery is not yet implemented.
 
 An AI assistant can help identify the changes, draft portal keywords and
 validation, and create tests. A person should review the requirements, access
@@ -113,8 +114,8 @@ Paths are resolved relative to the settings file's directory. The loader
 validates the settings format, URL, paths, and integer ranges (0-10 retries and
 0-300 seconds for retry delay, 1-300 seconds for download timeout); it does not
 create paths or check that input data exists.
-`max_retries` means additional attempts after the first attempt. The settings
-do not implement retries by themselves.
+`max_retries` means additional attempts after the first attempt. The sample
+settings use one retry and a five-second delay.
 
 Python code can call `load_settings` from `py_reframework.config` and use the
 returned `Settings` object. `ConfigurationError` is a `SystemFailure`;
@@ -122,7 +123,8 @@ returned `Settings` object. `ConfigurationError` is a `SystemFailure`;
 `TransientSystemError` identifies a potentially retryable technical failure.
 The batch passes validated rows and explicit error messages from Python to
 Robot; it records invalid rows as business failures and treats portal
-processing errors as system failures. These types do not implement retries.
+processing errors as system failures. The Robot task implements the retry
+policy; the exception types alone do not.
 
 For Python commands outside pytest, make `src` available for imports in the
 current PowerShell session:
@@ -176,7 +178,8 @@ The downloaded text files are the **primary output**. Each run creates a
 unique folder under the configured output directory, with a separate
 `statement-.../statement.txt` for each download. The run's `results.csv` is
 the secondary tracking report, with columns `transaction_id`, `start_date`,
-`end_date`, `status`, `download_path`, and `error`. Successful rows contain
+`end_date`, `status`, `attempts`, `download_path`, and `error`. `attempts`
+counts processing attempts; invalid rows have zero. Successful rows contain
 the full downloaded path; failed rows have an empty download path. To reduce
 spreadsheet formula risks, values beginning with `=`, `+`, `-`, or `@`
 (including after whitespace) are prefixed with an apostrophe in the report.
@@ -184,8 +187,21 @@ Treat CSV files as untrusted when opening them in spreadsheet software.
 
 Invalid IDs or dates produce `business_failure` rows and processing continues.
 If any row is invalid, the task ultimately fails with a nonzero exit code.
-A portal or download error produces a `system_failure` row and stops the run;
-remaining rows are not recorded. Look at Robot's log for failure details.
+When the initial portal page returns HTTP 502, 503, or 504, the bot closes
+the browser, waits for the configured delay, and retries up to `max_retries`
+times using a fresh browser session. Other errors, including browser
+timeouts, are not automatically assumed to be temporary.
+
+If these retries are exhausted, or a downloaded statement fails the existing
+content check, the bot records a `system_failure` and proceeds to the next
+row. A successful transaction resets the consecutive system-failure count;
+invalid business rows leave it unchanged. The bot stops after three
+consecutive system failures to avoid repeatedly processing a potential
+outage. Unexpected browser errors, rejected credentials, non-retryable HTTP
+responses, and other run-wide failures stop immediately. Look at Robot's log
+for details; the console shows a summary of recorded outcomes. Any recorded
+failure makes the task return a nonzero exit code.
+
 Missing or malformed input, configuration errors during initialization, and
 results-write failures stop the run; they may leave no row for the failure.
 Previously downloaded files and a partially written report can remain after a
@@ -193,9 +209,8 @@ failure, including a download that failed verification. Inspect them before
 rerunning.
 
 Each run uses new folders to avoid overwriting earlier output, but rerunning
-can download the same items again. There is no automatic retry, durable
-restart, cross-run deduplication, or multi-worker queue. Although retry
-settings are validated, they are not yet used by this workflow.
+can download the same items again. There is no durable restart, cross-run
+deduplication, or multi-worker queue.
 
 ## Run one demo statement
 
@@ -225,7 +240,7 @@ the task also attempts a screenshot on other failures if a browser is open.
 Screenshots, reports, and downloaded files can contain sensitive information
 and should be handled accordingly. The bot uses Browser's secret-input
 keyword to avoid logging credentials, but debug logs and screenshots require
-care. Automatic retries are not implemented.
+care. The single-statement task does not retry automatically.
 
 ## Portal selectors
 

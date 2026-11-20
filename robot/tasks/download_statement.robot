@@ -14,7 +14,10 @@ ${BROWSER_OPEN}    ${False}
 *** Tasks ***
 Download One Demo Statement
     ${request}=    Prepare Statement Request    ${CONFIG_FILE}    ${START_DATE}    ${END_DATE}
-    Open Demo Portal    ${request}[portal_url]
+    ${status}=    Open Demo Portal    ${request}[portal_url]
+    IF    ${status} < 200 or ${status} >= 400
+        Fail    Portal returned HTTP status ${status}.
+    END
     Log In To Demo Portal
     Open Banking Page
     ${path}=    Download Demo Statement
@@ -22,4 +25,5 @@ Download One Demo Statement
     ...    ${request}[end_date]
     ...    ${request}[download_path]
     ...    ${request}[download_timeout_seconds]
+    Verify Demo Statement    ${path}    ${request}[start_date]    ${request}[end_date]
     Log    Statement saved: ${path}
