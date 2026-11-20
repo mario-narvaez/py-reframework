@@ -2,10 +2,12 @@
 
 import csv
 import os
+import re
 import subprocess
 import sys
 import threading
 import time
+import xml.etree.ElementTree as ET
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -17,16 +19,40 @@ PAGE = """<!doctype html>
 <nav><a href="/login">Login</a></nav>
 <button data-testid="sidebar-toggle">Toggle</button>
 <aside data-testid="sidebar"><a href="/banking">Banking</a></aside>
-<input data-testid="username-input">
-<input data-testid="password-input" type="password">
-<button data-testid="login-button">Login</button>
-<input data-testid="start-date" type="date">
-<input data-testid="end-date" type="date">
-<button data-testid="download-statement">Download</button>
+<section id="login" hidden>
+  <input data-testid="username-input">
+  <input data-testid="password-input" type="password">
+  <button data-testid="login-button">Login</button>
+</section>
+<section id="banking" hidden>
+  <input data-testid="start-date" type="date">
+  <input data-testid="end-date" type="date">
+  <button data-testid="download-statement">Download</button>
+</section>
 <script>
-document.querySelectorAll('a').forEach(a => a.onclick = e => e.preventDefault());
+let loggedIn = false;
+const sidebar = document.querySelector('[data-testid="sidebar"]');
+const login = document.getElementById('login');
+const banking = document.getElementById('banking');
+document.querySelector('[data-testid="sidebar-toggle"]').onclick = () => {
+    sidebar.hidden = !sidebar.hidden;
+};
+document.querySelector('nav a').onclick = e => {
+    e.preventDefault();
+    login.hidden = false;
+    banking.hidden = true;
+};
+sidebar.querySelector('a').onclick = e => {
+    e.preventDefault();
+    if (loggedIn) {
+        login.hidden = true;
+        banking.hidden = false;
+    }
+};
 document.querySelector('[data-testid="login-button"]').onclick = () => {
-    if (document.querySelector('[data-testid="username-input"]').value === 'rejected') {
+    const username = document.querySelector('[data-testid="username-input"]').value;
+    const password = document.querySelector('[data-testid="password-input"]').value;
+    if (username !== 'admin' || password !== 'admin123') {
         const error = document.createElement('div');
         error.dataset.testid = 'username-error';
         error.textContent = 'Invalid username';
@@ -36,7 +62,10 @@ document.querySelector('[data-testid="login-button"]').onclick = () => {
     const close = document.createElement('button');
     close.dataset.testid = 'close-success-dialog';
     close.textContent = 'Close';
-    close.onclick = () => close.remove();
+    close.onclick = () => {
+        loggedIn = true;
+        close.remove();
+    };
     document.body.appendChild(close);
 };
 document.querySelector('[data-testid="download-statement"]').onclick = () => {
@@ -93,7 +122,8 @@ def portal():
 
 
 def prepare_batch(
-    tmp_path: Path, portal, rows: str, delay: int = 0, username: str = "admin", retries: int = 1
+    tmp_path: Path, portal, rows: str, delay: int = 0, username: str = "admin",
+    retries: int = 1, password: str = "admin123",
 ):
     (tmp_path / "input.csv").write_text(
         "transaction_id,start_date,end_date\n" + rows, encoding="utf-8"
@@ -108,7 +138,7 @@ def prepare_batch(
     env = os.environ.copy()
     env["PYTHONPATH"] = str(ROOT / "src")
     env["PORTAL_USERNAME"] = username
-    env["PORTAL_PASSWORD"] = "admin123"
+    env["PORTAL_PASSWORD"] = password
     command = [
         sys.executable, "-m", "robot", "--outputdir", str(tmp_path / "robot"),
         "--variable", f"CONFIG_FILE:{config}",
@@ -124,10 +154,43 @@ def read_results(tmp_path: Path) -> list[dict]:
         return list(csv.DictReader(file))
 
 
+def successful_keywords(root: ET.Element, name: str) -> list[ET.Element]:
+    return [
+        keyword for keyword in root.iter("kw")
+        if keyword.get("name") == name
+        and (status := keyword.find("status")) is not None
+        and status.get("status") == "PASS"
+    ]
+
+
+def assert_failure_screenshot(tmp_path: Path, parent_keyword: str) -> None:
+    root = ET.parse(tmp_path / "robot" / "output.xml").getroot()
+    captures = [
+        capture
+        for parent in successful_keywords(root, parent_keyword)
+        for capture in successful_keywords(parent, "Capture Failure Evidence")
+    ]
+    screenshots = [
+        screenshot
+        for capture in captures
+        for screenshot in successful_keywords(capture, "Take Screenshot")
+    ]
+    assert screenshots, f"No successful failure screenshot within {parent_keyword}"
+    links = [
+        match
+        for screenshot in screenshots
+        for message in screenshot.iter("msg")
+        for match in re.findall(r'href="([^"]+\.png)"', message.text or "")
+    ]
+    assert links, "The failure screenshot was not linked in Robot's output"
+    assert any((tmp_path / "robot").joinpath(*link.split("/")).is_file() for link in links)
+
+
 def run_batch(
-    tmp_path: Path, portal, rows: str, username: str = "admin", delay: int = 0, retries: int = 1
+    tmp_path: Path, portal, rows: str, username: str = "admin", delay: int = 0,
+    retries: int = 1, password: str = "admin123",
 ) -> tuple[subprocess.CompletedProcess, list[dict]]:
-    command, env = prepare_batch(tmp_path, portal, rows, delay, username, retries)
+    command, env = prepare_batch(tmp_path, portal, rows, delay, username, retries, password)
     result = subprocess.run(command, cwd=tmp_path, env=env, capture_output=True, text=True, timeout=90)
     return result, read_results(tmp_path)
 
@@ -158,14 +221,14 @@ def test_batch_continues_after_statement_verification_failure(
         tmp_path, portal,
         "first,2025-01-01,2025-01-31\n"
         "broken,2025-02-01,2025-02-28\n"
-        "not-processed,2025-03-01,2025-03-31\n",
+        "last,2025-03-01,2025-03-31\n",
     )
     assert result.returncode != 0
     assert [row["status"] for row in rows] == ["success", "system_failure", "success"]
     assert [row["attempts"] for row in rows] == ["1", "1", "1"]
     assert Path(rows[0]["download_path"]).is_file()
     assert not rows[1]["download_path"]
-    assert list((tmp_path / "robot").rglob("*.png"))
+    assert_failure_screenshot(tmp_path, "Process Statement Attempt")
 
 
 @pytest.mark.parametrize(("http_status", "delay"), [(502, 0), (503, 5), (504, 0)])
@@ -182,7 +245,18 @@ def test_temporary_http_failure_retries_in_a_new_browser_session(
     assert portal.cookies == ["", ""]
     assert "retrying" in result.stdout
     assert "1 succeeded, 0 business failures, 0 system failures" in result.stdout
-    assert list((tmp_path / "robot").rglob("*.png"))
+    assert_failure_screenshot(tmp_path, "Ensure Portal Session")
+    root = ET.parse(tmp_path / "robot" / "output.xml").getroot()
+    browser_events = [
+        keyword.get("name")
+        for keyword in root.iter("kw")
+        if keyword.get("owner") == "Browser"
+        and keyword.get("name") in {"New Browser", "Close Browser"}
+        and (status := keyword.find("status")) is not None
+        and status.get("status") == "PASS"
+    ]
+    assert browser_events == ["New Browser", "Close Browser", "New Browser", "Close Browser"]
+    assert successful_keywords(root, "Close Browser")[0].findtext("arg") == "ALL"
 
 
 def test_zero_retries_records_temporary_failure_and_continues(tmp_path: Path, portal) -> None:
@@ -236,22 +310,35 @@ def test_success_resets_the_system_failure_streak(tmp_path: Path, portal) -> Non
     ]
 
 
-@pytest.mark.parametrize(("http_status", "username"), [(403, "admin"), (200, "rejected")])
+@pytest.mark.parametrize(
+    ("http_status", "username", "password", "expected_error"),
+    [
+        (403, "admin", "admin123", "Portal returned non-retryable HTTP status 403."),
+        (200, "rejected", "admin123", "Demo portal rejected the supplied credentials."),
+        (200, "admin", "wrong-password", "Demo portal rejected the supplied credentials."),
+    ],
+)
 def test_permanent_failures_stop_without_retry(
-    tmp_path: Path, portal, http_status: int, username: str
+    tmp_path: Path, portal, http_status: int, username: str, password: str, expected_error: str
 ) -> None:
     portal.statuses = [http_status]
     result, rows = run_batch(
         tmp_path, portal,
         "one,2025-01-01,2025-01-31\ntwo,2025-01-01,2025-01-31\n",
-        username=username,
+        username=username, password=password,
     )
     assert result.returncode != 0
     assert [row["status"] for row in rows] == ["system_failure"]
     assert rows[0]["attempts"] == "1"
     assert portal.requests == 1
     assert "retrying" not in result.stdout
-    assert "admin123" not in (tmp_path / "robot" / "output.xml").read_text(encoding="utf-8")
+    output = (tmp_path / "robot" / "output.xml").read_text(encoding="utf-8")
+    failures = [
+        message.text for message in ET.fromstring(output).iter("msg")
+        if message.get("level") == "FAIL"
+    ]
+    assert expected_error in failures
+    assert password not in output
 
 
 def test_missing_credentials_stop_without_opening_a_browser(tmp_path: Path, portal) -> None:
