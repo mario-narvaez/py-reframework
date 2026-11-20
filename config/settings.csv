@@ -4,3 +4,4 @@ input_csv,../data/transactions.csv
 output_dir,../output
 max_retries,2
 retry_delay_seconds,5
+download_timeout_seconds,30

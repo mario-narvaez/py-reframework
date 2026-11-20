@@ -15,6 +15,7 @@ class Settings:
     output_dir: Path
     max_retries: int
     retry_delay_seconds: int
+    download_timeout_seconds: int
 
 
 _REQUIRED_SETTINGS = {
@@ -23,6 +24,7 @@ _REQUIRED_SETTINGS = {
     "output_dir",
     "max_retries",
     "retry_delay_seconds",
+    "download_timeout_seconds",
 }
 
 
@@ -78,15 +80,21 @@ def _validate_url(value: str) -> str:
     return value
 
 
-def _bounded_integer(name: str, value: str, maximum: int) -> int:
+def _bounded_integer(name: str, value: str, maximum: int, minimum: int = 0) -> int:
     if not value.isascii() or not value.isdecimal():
-        raise ConfigurationError(f"{name} must be an integer between 0 and {maximum}")
+        raise ConfigurationError(
+            f"{name} must be an integer between {minimum} and {maximum}"
+        )
     digits = value.lstrip("0") or "0"
     if len(digits) > len(str(maximum)):
-        raise ConfigurationError(f"{name} must be an integer between 0 and {maximum}")
+        raise ConfigurationError(
+            f"{name} must be an integer between {minimum} and {maximum}"
+        )
     number = int(digits)
-    if number > maximum:
-        raise ConfigurationError(f"{name} must be an integer between 0 and {maximum}")
+    if not minimum <= number <= maximum:
+        raise ConfigurationError(
+            f"{name} must be an integer between {minimum} and {maximum}"
+        )
     return number
 
 
@@ -113,5 +121,8 @@ def load_settings(path: str | Path) -> Settings:
         max_retries=_bounded_integer("max_retries", values["max_retries"], 10),
         retry_delay_seconds=_bounded_integer(
             "retry_delay_seconds", values["retry_delay_seconds"], 300
+        ),
+        download_timeout_seconds=_bounded_integer(
+            "download_timeout_seconds", values["download_timeout_seconds"], 300, 1
         ),
     )

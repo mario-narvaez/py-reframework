@@ -1,14 +1,61 @@
 # py-reframework
 
 A proposed RPA proof of concept that applies ideas from UiPath REFramework to
-Python automation. The first bot will download practice statements for date
-ranges supplied in a CSV and record the results in another CSV.
+Python automation, with the goal of creating a readable starting point for
+future business automations. The first bot will download practice statements
+for date ranges supplied in a CSV and record the results in another CSV.
 
 ## Status
 
-The project has a development setup, a CSV settings loader, and Python failure
-types. No browser automation, transaction queue, retry policy, or export
-functionality has been implemented yet.
+The project can download and verify one simulated statement for a supplied
+date range. The CSV transaction loop, results CSV, and retry policy have not
+been implemented yet.
+
+## From this demo to other solutions
+
+The demo is a starting point for the same transaction-processing pattern used
+in many business automations: initialize, get an item, process it, record the
+outcome, and finish. For this portal, an item is a date range. For a different
+solution, an item could be identified by one of the following:
+
+| Identifier | Example of a future automation |
+| --- | --- |
+| Invoice number | Find an invoice and extract its details or download it. |
+| Purchase order (PO) number | Find a purchase order and capture its status. |
+| Deduction or claim ID | Look up a deduction or claim and record its details. |
+| Shipment or tracking number | Check a delivery status. |
+| Order number | Retrieve order details or status. |
+| Vendor ID | Look up a vendor record. |
+| Customer ID | Retrieve customer information. |
+| Support case number | Check a case's current status. |
+
+These are possible future adaptations, **not features of the demo portal or
+implemented solutions**. The first bot's downloaded text file contains no
+actual transaction records. The full multi-item lifecycle and outcome recording
+are planned, not yet implemented.
+
+### What can be reused or adapted?
+
+| Component | Current role | For another solution |
+| --- | --- | --- |
+| Robot Framework and Browser Library | Run keywords, interact with the browser, and provide execution reports. | The same tools can be used without rewriting them; project dependencies or versions may need changes. |
+| [Failure types](src/py_reframework/exceptions.py) | Define business and system failure categories. | The categories can be a starting point; classification and handling need review for each process. |
+| [Configuration loader](src/py_reframework/config.py) and [settings](config/settings.csv) | Read and validate this bot's settings. | Reuse the approach; update values and adapt the schema and validation if requirements differ. |
+| [Robot task](robot/tasks/download_statement.robot) | Orchestrates one statement download. | Adapt the steps and inputs; a generic transaction loop is not implemented yet. |
+| [Portal resource](robot/resources/demo_portal.resource) | Contains demo login, selectors, and download actions. | Replace or adapt login, navigation, selectors, and actions for the target application. |
+| [Statement support](src/py_reframework/portal_support.py) | Validates date ranges and verifies the demo statement. | Replace or adapt validation and output checks for invoices, orders, or other records. |
+| [Tests](tests/) | Check current settings, validation, and selectors. | Adapt and add tests for the new application's rules and failure paths. |
+
+No project module is guaranteed to work unchanged for every solution. Reuse
+must be verified, especially when an automation changes external data: retries
+and restart rules for an update may differ from those for a download. CSV
+transaction processing, outcome recording, and recovery are intended reusable
+building blocks, but are not yet implemented or proven across solutions.
+
+An AI assistant can help identify the changes, draft portal keywords and
+validation, and create tests. A person should review the requirements, access
+permissions, selectors, security, and test results; do not share secrets or
+sensitive business data with an AI tool.
 
 ## Proposed approach
 
@@ -42,16 +89,16 @@ site useful for practicing the workflow, but it does not demonstrate
 consolidation of real business records. Use only the site's demo credentials,
 not real passwords or personal information.
 
-The automation and CSV formats have not been implemented yet. A later
-automation may adapt the framework to a portal with structured business data.
+The single-statement workflow is implemented; the input and results CSV
+formats are not yet implemented. A later automation may adapt the framework to
+a portal with structured business data.
 
 ## Project layout
 
-- `robot/tasks/`: future high-level Robot Framework tasks.
-- `robot/resources/`: future reusable Robot keywords and portal interactions.
-- `config/settings.csv`: non-secret settings for the planned bot.
-- `src/py_reframework/`: Python configuration and failure types; future data
-  and transaction logic.
+- `robot/tasks/`: high-level Robot Framework tasks.
+- `robot/resources/`: reusable Robot keywords and portal interactions.
+- `config/settings.csv`: non-secret settings for the bot.
+- `src/py_reframework/`: Python configuration, validation, and failure types.
 - `tests/`: automated tests for Python components.
 - `output/`: generated results and reports; excluded from Git.
 
@@ -60,10 +107,12 @@ The `.gitkeep` files keep empty folders in Git until they contain project files.
 ## Configuration and failure types
 
 `config/settings.csv` has `setting,value` columns. It defines the portal URL,
-input CSV path, output directory, maximum retries, and delay between retries.
+input CSV path, output directory, maximum retries, delay between retries, and
+download timeout.
 Paths are resolved relative to the settings file's directory. The loader
 validates the settings format, URL, paths, and integer ranges (0-10 retries and
-0-300 seconds); it does not create paths or check that input data exists.
+0-300 seconds for retry delay, 1-300 seconds for download timeout); it does not
+create paths or check that input data exists.
 `max_retries` means additional attempts after the first attempt. The settings
 do not implement retries by themselves.
 
@@ -81,11 +130,58 @@ current PowerShell session:
 $env:PYTHONPATH = (Join-Path (Get-Location) 'src')
 ```
 
-Run the configuration tests from the repository root (pytest configures its own
+Run the Python tests from the repository root (pytest configures its own
 import path):
 
 ```powershell
-.\.venv\Scripts\python.exe -m pytest tests\test_config.py
+.\.venv\Scripts\python.exe -m pytest tests\test_config.py tests\test_portal_support.py
+```
+
+## Run one demo statement
+
+After completing the development setup, run the following in PowerShell from
+the repository root. The credentials below are the site's public demo values;
+never use real credentials or personal information on this practice site.
+
+```powershell
+$env:PYTHONPATH = (Join-Path (Get-Location) 'src')
+$env:PLAYWRIGHT_BROWSERS_PATH = (Join-Path (Get-Location) '.venv\ms-playwright')
+$env:PORTAL_USERNAME = 'admin'
+$env:PORTAL_PASSWORD = 'admin123'
+.\.venv\Scripts\python.exe -m robot --outputdir output\robot `
+    --variable START_DATE:2025-01-01 --variable END_DATE:2025-01-31 `
+    robot\tasks\download_statement.robot
+```
+
+Replace the dates with a valid `YYYY-MM-DD` range. The task runs headlessly by
+default; add `--variable HEADLESS:False` before the task path to see the browser.
+Each run saves the statement in a unique folder under the configured output
+directory, so it does not overwrite previous downloads. Robot reports are
+written to `output/robot/`; inspect `log.html` for the saved path and
+execution details. A failed task returns a nonzero exit code.
+
+Browser Library is configured to take screenshots on its keyword failures;
+the task also attempts a screenshot on other failures if a browser is open.
+Screenshots, reports, and downloaded files can contain sensitive information
+and should be handled accordingly. The bot uses Browser's secret-input
+keyword to avoid logging credentials, but debug logs and screenshots require
+care. Automatic retries and a results CSV are not implemented.
+
+## Portal selectors
+
+The portal resource uses the site's `data-testid` attributes where available.
+For navigation links without test IDs, the login link is identified by its
+role and name within the navigation bar; the Banking link is scoped to the
+sidebar and identified by its route. These selectors describe the elements,
+not fixed screen coordinates. Browser Library uses strict matching by default:
+an ambiguous action fails instead of silently choosing a match. Selectors can
+still break if the site changes, so verify them when updating the workflow.
+
+Run the local selector checks after installing Chromium:
+
+```powershell
+$env:PLAYWRIGHT_BROWSERS_PATH = (Join-Path (Get-Location) '.venv\ms-playwright')
+.\.venv\Scripts\python.exe -m robot --outputdir output\selector-tests tests\robot\selector_contract.robot
 ```
 
 ## Development setup

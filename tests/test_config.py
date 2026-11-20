@@ -13,6 +13,7 @@ VALID_SETTINGS = {
     "output_dir": "../output",
     "max_retries": "2",
     "retry_delay_seconds": "5",
+    "download_timeout_seconds": "30",
 }
 
 
@@ -36,6 +37,7 @@ def test_loads_settings_and_resolves_paths_relative_to_csv(tmp_path: Path) -> No
     assert settings.output_dir == tmp_path / "output"
     assert settings.max_retries == 2
     assert settings.retry_delay_seconds == 5
+    assert settings.download_timeout_seconds == 30
 
 
 def test_repository_settings_load() -> None:
@@ -58,6 +60,8 @@ def test_repository_settings_load() -> None:
         ("max_retries", "1.5"),
         ("max_retries", "9" * 5000),
         ("retry_delay_seconds", "301"),
+        ("download_timeout_seconds", "0"),
+        ("download_timeout_seconds", "301"),
     ],
 )
 def test_rejects_invalid_values(tmp_path: Path, name: str, value: str) -> None:
