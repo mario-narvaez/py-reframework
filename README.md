@@ -142,7 +142,9 @@ $env:PLAYWRIGHT_BROWSERS_PATH = (Join-Path (Get-Location) '.venv\ms-playwright')
 ```
 
 The batch integration tests use a local mock portal and require the installed
-Chromium browser; they do not depend on the public practice site.
+Chromium browser; they do not depend on the public practice site. The mock
+requires the bot's login and Banking navigation sequence so the tests can
+check it; the real site's Banking page does not require login.
 
 ## Run a batch of statements
 
