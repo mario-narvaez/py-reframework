@@ -5,6 +5,7 @@ import os
 import subprocess
 import sys
 import threading
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -25,6 +26,13 @@ PAGE = """<!doctype html>
 <script>
 document.querySelectorAll('a').forEach(a => a.onclick = e => e.preventDefault());
 document.querySelector('[data-testid="login-button"]').onclick = () => {
+    if (document.querySelector('[data-testid="username-input"]').value === 'rejected') {
+        const error = document.createElement('div');
+        error.dataset.testid = 'username-error';
+        error.textContent = 'Invalid username';
+        document.body.appendChild(error);
+        return;
+    }
     const close = document.createElement('button');
     close.dataset.testid = 'close-success-dialog';
     close.textContent = 'Close';
@@ -48,11 +56,19 @@ document.querySelector('[data-testid="download-statement"]').onclick = () => {
 
 
 @pytest.fixture
-def portal_url():
+def portal():
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
+            if self.path != "/":
+                self.send_error(404)
+                return
+            self.server.requests += 1
+            self.server.request_times.append(time.monotonic())
+            self.server.cookies.append(self.headers.get("Cookie", ""))
+            status = self.server.statuses.pop(0) if self.server.statuses else 200
             body = PAGE.encode("utf-8")
-            self.send_response(200)
+            self.send_response(status)
+            self.send_header("Set-Cookie", "retry-check=seen; Path=/")
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
@@ -62,50 +78,65 @@ def portal_url():
             pass
 
     server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    server.statuses = []
+    server.requests = 0
+    server.request_times = []
+    server.cookies = []
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:
-        yield f"http://127.0.0.1:{server.server_port}/"
+        yield server
     finally:
         server.shutdown()
         thread.join()
         server.server_close()
 
 
-def run_batch(tmp_path: Path, portal_url: str, rows: str) -> tuple[subprocess.CompletedProcess, list[dict]]:
+def prepare_batch(
+    tmp_path: Path, portal, rows: str, delay: int = 0, username: str = "admin", retries: int = 1
+):
     (tmp_path / "input.csv").write_text(
         "transaction_id,start_date,end_date\n" + rows, encoding="utf-8"
     )
     config = tmp_path / "settings.csv"
     config.write_text(
-        f"setting,value\nportal_url,{portal_url}\n"
+        f"setting,value\nportal_url,http://127.0.0.1:{portal.server_port}/\n"
         "input_csv,input.csv\noutput_dir,output\n"
-        "max_retries,2\nretry_delay_seconds,5\ndownload_timeout_seconds,10\n",
+        f"max_retries,{retries}\nretry_delay_seconds,{delay}\ndownload_timeout_seconds,10\n",
         encoding="utf-8",
     )
     env = os.environ.copy()
     env["PYTHONPATH"] = str(ROOT / "src")
-    env["PORTAL_USERNAME"] = "admin"
+    env["PORTAL_USERNAME"] = username
     env["PORTAL_PASSWORD"] = "admin123"
-    result = subprocess.run(
-        [
-            sys.executable, "-m", "robot", "--outputdir", str(tmp_path / "robot"),
-            "--variable", f"CONFIG_FILE:{config}",
-            str(ROOT / "robot" / "tasks" / "process_transactions.robot"),
-        ],
-        cwd=ROOT, env=env, capture_output=True, text=True, timeout=90,
-    )
+    command = [
+        sys.executable, "-m", "robot", "--outputdir", str(tmp_path / "robot"),
+        "--variable", f"CONFIG_FILE:{config}",
+        str(ROOT / "robot" / "tasks" / "process_transactions.robot"),
+    ]
+    return command, env
+
+
+def read_results(tmp_path: Path) -> list[dict]:
     reports = list((tmp_path / "output").glob("run-*/results.csv"))
-    assert len(reports) == 1, result.stdout + result.stderr
+    assert len(reports) == 1
     with reports[0].open(encoding="utf-8", newline="") as file:
-        return result, list(csv.DictReader(file))
+        return list(csv.DictReader(file))
+
+
+def run_batch(
+    tmp_path: Path, portal, rows: str, username: str = "admin", delay: int = 0, retries: int = 1
+) -> tuple[subprocess.CompletedProcess, list[dict]]:
+    command, env = prepare_batch(tmp_path, portal, rows, delay, username, retries)
+    result = subprocess.run(command, cwd=tmp_path, env=env, capture_output=True, text=True, timeout=90)
+    return result, read_results(tmp_path)
 
 
 def test_batch_continues_after_business_failure_and_downloads_each_valid_row(
-    tmp_path: Path, portal_url: str
+    tmp_path: Path, portal
 ) -> None:
     result, rows = run_batch(
-        tmp_path, portal_url,
+        tmp_path, portal,
         "first,2025-01-01,2025-01-31\n"
         "invalid,2025-02-30,2025-03-01\n"
         "last,2025-03-01,2025-03-31\n",
@@ -117,19 +148,146 @@ def test_batch_continues_after_business_failure_and_downloads_each_valid_row(
     for path, row in zip(paths, (rows[0], rows[2])):
         assert f"Date Range: {row['start_date']} to {row['end_date']}" in path.read_text()
     assert not rows[1]["download_path"]
+    assert [row["attempts"] for row in rows] == ["1", "0", "1"]
 
 
-def test_batch_records_system_failure_and_stops_before_next_row(
-    tmp_path: Path, portal_url: str
+def test_batch_continues_after_statement_verification_failure(
+    tmp_path: Path, portal
 ) -> None:
     result, rows = run_batch(
-        tmp_path, portal_url,
+        tmp_path, portal,
         "first,2025-01-01,2025-01-31\n"
         "broken,2025-02-01,2025-02-28\n"
         "not-processed,2025-03-01,2025-03-31\n",
     )
     assert result.returncode != 0
-    assert [row["status"] for row in rows] == ["success", "system_failure"]
-    assert [row["transaction_id"] for row in rows] == ["first", "broken"]
+    assert [row["status"] for row in rows] == ["success", "system_failure", "success"]
+    assert [row["attempts"] for row in rows] == ["1", "1", "1"]
     assert Path(rows[0]["download_path"]).is_file()
     assert not rows[1]["download_path"]
+    assert list((tmp_path / "robot").rglob("*.png"))
+
+
+@pytest.mark.parametrize(("http_status", "delay"), [(502, 0), (503, 5), (504, 0)])
+def test_temporary_http_failure_retries_in_a_new_browser_session(
+    tmp_path: Path, portal, http_status: int, delay: int
+) -> None:
+    portal.statuses = [http_status, 200]
+    result, rows = run_batch(tmp_path, portal, "one,2025-01-01,2025-01-31\n", delay=delay)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert rows[0]["status"] == "success"
+    assert rows[0]["attempts"] == "2"
+    assert portal.requests == 2
+    assert portal.request_times[1] - portal.request_times[0] >= delay
+    assert portal.cookies == ["", ""]
+    assert "retrying" in result.stdout
+    assert "1 succeeded, 0 business failures, 0 system failures" in result.stdout
+    assert list((tmp_path / "robot").rglob("*.png"))
+
+
+def test_zero_retries_records_temporary_failure_and_continues(tmp_path: Path, portal) -> None:
+    portal.statuses = [503, 200]
+    result, rows = run_batch(
+        tmp_path, portal,
+        "one,2025-01-01,2025-01-31\ntwo,2025-01-01,2025-01-31\n",
+        retries=0,
+    )
+    assert result.returncode != 0
+    assert [row["status"] for row in rows] == ["system_failure", "success"]
+    assert [row["attempts"] for row in rows] == ["1", "1"]
+    assert portal.requests == 2
+
+
+def test_three_consecutive_system_failures_stop_the_batch(tmp_path: Path, portal) -> None:
+    portal.statuses = [503] * 6
+    result, rows = run_batch(
+        tmp_path, portal,
+        "one,2025-01-01,2025-01-31\n"
+        "invalid,2025-02-30,2025-03-01\n"
+        "two,2025-01-01,2025-01-31\n"
+        "three,2025-01-01,2025-01-31\n"
+        "unprocessed,2025-01-01,2025-01-31\n",
+    )
+    assert result.returncode != 0
+    assert [row["status"] for row in rows] == [
+        "system_failure", "business_failure", "system_failure", "system_failure"
+    ]
+    assert [row["attempts"] for row in rows] == ["2", "0", "2", "2"]
+    assert portal.requests == 6
+    assert "Stopped after 3 consecutive system failures" in result.stdout
+    assert "0 succeeded, 1 business failures, 3 system failures" in result.stdout
+
+
+def test_success_resets_the_system_failure_streak(tmp_path: Path, portal) -> None:
+    portal.statuses = [503, 503, 200, 503, 503, 503, 503]
+    result, rows = run_batch(
+        tmp_path, portal,
+        "first,2025-01-01,2025-01-31\n"
+        "success,2025-03-01,2025-03-31\n"
+        "broken,2025-02-01,2025-02-28\n"
+        "fourth,2025-01-01,2025-01-31\n"
+        "fifth,2025-01-01,2025-01-31\n"
+        "unprocessed,2025-01-01,2025-01-31\n",
+    )
+    assert result.returncode != 0
+    assert [row["transaction_id"] for row in rows] == ["first", "success", "broken", "fourth", "fifth"]
+    assert [row["status"] for row in rows] == [
+        "system_failure", "success", "system_failure", "system_failure", "system_failure"
+    ]
+
+
+@pytest.mark.parametrize(("http_status", "username"), [(403, "admin"), (200, "rejected")])
+def test_permanent_failures_stop_without_retry(
+    tmp_path: Path, portal, http_status: int, username: str
+) -> None:
+    portal.statuses = [http_status]
+    result, rows = run_batch(
+        tmp_path, portal,
+        "one,2025-01-01,2025-01-31\ntwo,2025-01-01,2025-01-31\n",
+        username=username,
+    )
+    assert result.returncode != 0
+    assert [row["status"] for row in rows] == ["system_failure"]
+    assert rows[0]["attempts"] == "1"
+    assert portal.requests == 1
+    assert "retrying" not in result.stdout
+    assert "admin123" not in (tmp_path / "robot" / "output.xml").read_text(encoding="utf-8")
+
+
+def test_missing_credentials_stop_without_opening_a_browser(tmp_path: Path, portal) -> None:
+    result, rows = run_batch(
+        tmp_path, portal, "one,2025-01-01,2025-01-31\n", username=""
+    )
+    assert result.returncode != 0
+    assert rows[0]["status"] == "system_failure"
+    assert rows[0]["attempts"] == "1"
+    assert portal.requests == 0
+    assert "retrying" not in result.stdout
+
+
+def test_interrupted_run_retains_only_completed_results(tmp_path: Path, portal) -> None:
+    portal.statuses = [200, 503]
+    command, env = prepare_batch(
+        tmp_path, portal,
+        "broken,2025-02-01,2025-02-28\nnext,2025-01-01,2025-01-31\n",
+        delay=30,
+    )
+    console_path = tmp_path / "console.txt"
+    with console_path.open("w", encoding="utf-8") as console:
+        process = subprocess.Popen(
+            command, cwd=tmp_path, env=env, stdout=console, stderr=subprocess.STDOUT
+        )
+        try:
+            deadline = time.monotonic() + 30
+            while process.poll() is None and time.monotonic() < deadline:
+                if "retrying after" in console_path.read_text(encoding="utf-8"):
+                    break
+                time.sleep(0.1)
+            assert "retrying after" in console_path.read_text(encoding="utf-8")
+            assert [row["transaction_id"] for row in read_results(tmp_path)] == ["broken"]
+        finally:
+            if process.poll() is None:
+                process.terminate()
+            process.wait(timeout=15)
+    assert process.returncode != 0
+    assert [row["transaction_id"] for row in read_results(tmp_path)] == ["broken"]

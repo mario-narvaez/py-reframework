@@ -60,13 +60,19 @@ def prepare_statement_request(config_path: str, start_date: str, end_date: str) 
 
 
 @keyword
-def verify_demo_statement(path: str, start_date: str, end_date: str) -> None:
-    """Check that the demo download contains the requested date range."""
+def check_demo_statement(path: str, start_date: str, end_date: str) -> bool:
+    """Return whether the demo download contains the requested date range."""
     try:
         content = Path(path).read_text(encoding="utf-8")
     except (OSError, UnicodeError) as error:
         raise SystemFailure(f"Cannot read downloaded statement: {path}") from error
     expected = f"Date Range: {start_date} to {end_date}"
     lines = content.splitlines()
-    if "BANK STATEMENT" not in lines or expected not in lines:
+    return "BANK STATEMENT" in lines and expected in lines
+
+
+@keyword
+def verify_demo_statement(path: str, start_date: str, end_date: str) -> None:
+    """Fail if the demo download does not contain the requested date range."""
+    if not check_demo_statement(path, start_date, end_date):
         raise SystemFailure("Downloaded statement does not contain the requested date range")

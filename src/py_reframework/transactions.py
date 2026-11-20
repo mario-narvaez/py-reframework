@@ -11,7 +11,7 @@ from .exceptions import BusinessRuleError, ConfigurationError, SystemFailure
 from .portal_support import reserve_statement_path, validate_date_range
 
 _INPUT_COLUMNS = ["transaction_id", "start_date", "end_date"]
-_RESULT_COLUMNS = _INPUT_COLUMNS + ["status", "download_path", "error"]
+_RESULT_COLUMNS = _INPUT_COLUMNS + ["status", "attempts", "download_path", "error"]
 
 
 def _read_transactions(path: Path) -> list[dict[str, str]]:
@@ -78,6 +78,8 @@ def initialize_batch(config_path: str) -> dict:
     return {
         "portal_url": settings.portal_url,
         "download_timeout_seconds": settings.download_timeout_seconds,
+        "max_retries": settings.max_retries,
+        "retry_delay_seconds": settings.retry_delay_seconds,
         "run_dir": str(run_dir),
         "results_path": str(results_path),
         "transactions": transactions,
@@ -91,7 +93,8 @@ def reserve_batch_statement_path(batch: dict) -> str:
 
 @keyword
 def record_transaction_result(
-    batch: dict, transaction: dict, status: str, download_path: str = "", error: str = ""
+    batch: dict, transaction: dict, status: str, download_path: str = "", error: str = "",
+    attempts: int = 1,
 ) -> None:
     """Append one completed transaction to the results CSV."""
     if status not in {"success", "business_failure", "system_failure"}:
@@ -101,6 +104,7 @@ def record_transaction_result(
         transaction["start_date"],
         transaction["end_date"],
         status,
+        str(attempts),
         download_path,
         error,
     ]
