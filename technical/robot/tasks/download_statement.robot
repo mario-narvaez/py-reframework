@@ -8,13 +8,13 @@ Task Teardown    Finish Browser Session
 ${CONFIG_FILE}     ${CURDIR}${/}..${/}..${/}config${/}settings.csv
 ${START_DATE}      ${EMPTY}
 ${END_DATE}        ${EMPTY}
-${HEADLESS}        ${True}
+${HEADLESS}        ${False}
 ${BROWSER_OPEN}    ${False}
 
 *** Tasks ***
 Download One Demo Statement
     ${request}=    Prepare Statement Request    ${CONFIG_FILE}    ${START_DATE}    ${END_DATE}
-    ${status}=    Open Demo Portal    ${request}[portal_url]
+    ${status}=    Open Demo Portal    ${request}[portal_url]    ${request}[demo_delay_seconds]
     IF    ${status} < 200 or ${status} >= 400
         Fail    Portal returned HTTP status ${status}.
     END

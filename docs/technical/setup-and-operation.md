@@ -44,8 +44,8 @@ variables in the current PowerShell session.
 
 [technical/config/settings.csv](../../technical/config/settings.csv) uses `setting,value`
 columns. It supplies the portal URL, input CSV path, output directory,
-maximum retries, retry delay, and download timeout. Paths are resolved
-relative to the settings file's directory.
+maximum retries, retry delay, download timeout, and visible-demo pacing.
+Paths are resolved relative to the settings file's directory.
 
 | Setting | Meaning | Valid range / sample value |
 | --- | --- | --- |
@@ -55,12 +55,18 @@ relative to the settings file's directory.
 | `max_retries` | Additional attempts after the first. | 0-10; sample: 1. |
 | `retry_delay_seconds` | Wait before a retry. | 0-300 seconds; sample: 5. |
 | `download_timeout_seconds` | Download wait limit. | 1-300 seconds; sample: 30. |
+| `demo_delay_preset` | Pacing preset for a visible browser. | `short`, `medium`, or `long`; sample: `short`. |
+| `demo_delay_short_seconds` | Short demo pacing. | 0-30 seconds; sample: 1. |
+| `demo_delay_medium_seconds` | Medium demo pacing. | 0-30 seconds; sample: 3. |
+| `demo_delay_long_seconds` | Long demo pacing. | 0-30 seconds; sample: 5. |
 
 The configuration loader validates the settings format, URL, paths, and
 integer ranges. It resolves paths but does not check input existence or create
 directories. Batch initialization reads and validates the input, then creates
 the output directory and report. Retry settings apply only to the batch's
-identified temporary errors described below.
+identified temporary errors described below. Demo delays must be ordered
+short <= medium <= long. Existing custom settings files must include the demo
+settings too.
 
 Python callers can import `load_settings` from `py_reframework.config` and
 use the returned `Settings` object. For Python commands outside pytest, make
@@ -99,10 +105,18 @@ $env:PORTAL_PASSWORD = 'admin123'
     technical\robot\tasks\process_transactions.robot
 ```
 
-The credentials above are the practice site's public values. The task runs
-headlessly by default; add `--variable HEADLESS:False` before the task path to
-see the browser. A simple launcher is being considered for the future; it is
-not implemented.
+The credentials above are the practice site's public values. By default, the
+browser is visible so you can watch it work. To hide the browser window, add
+`--variable HEADLESS:True` before the task path. In this headless mode, the
+browser still operates the website, downloads statements, and records results.
+A visible browser uses the configured demo pacing preset;
+headless runs have no added demo pacing. Browser Library's `slowMo` slows
+Playwright operations, so it does not guarantee exactly one second per visible
+interaction or keep the browser open at the end. This is for observation, not
+reliability: readiness checks and timeouts still apply. The preset values are
+project choices, not industry standards.
+
+A simple launcher is being considered for the future; it is not implemented.
 
 ### Outputs
 
@@ -205,8 +219,8 @@ $env:PORTAL_PASSWORD = 'admin123'
     technical\robot\tasks\download_statement.robot
 ```
 
-Replace the dates with a valid `YYYY-MM-DD` range. Add
-`--variable HEADLESS:False` before the task path to see the browser. The
+Replace the dates with a valid `YYYY-MM-DD` range. The browser is visible by
+default; add `--variable HEADLESS:True` before the task path to hide it. The
 statement is saved as `downloads/statement-001.txt` inside a dated run folder
 under the configured output directory. This task does not create a results CSV;
 inspect `log.html` for its path and execution details. The task returns a

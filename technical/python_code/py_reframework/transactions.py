@@ -76,6 +76,7 @@ def initialize_batch(config_path: str) -> dict:
     return {
         "portal_url": settings.portal_url,
         "download_timeout_seconds": settings.download_timeout_seconds,
+        "demo_delay_seconds": settings.demo_delay_seconds,
         "max_retries": settings.max_retries,
         "retry_delay_seconds": settings.retry_delay_seconds,
         "run_dir": str(run_dir),

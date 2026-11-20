@@ -16,6 +16,7 @@ class Settings:
     max_retries: int
     retry_delay_seconds: int
     download_timeout_seconds: int
+    demo_delay_seconds: int
 
 
 _REQUIRED_SETTINGS = {
@@ -25,6 +26,10 @@ _REQUIRED_SETTINGS = {
     "max_retries",
     "retry_delay_seconds",
     "download_timeout_seconds",
+    "demo_delay_preset",
+    "demo_delay_short_seconds",
+    "demo_delay_medium_seconds",
+    "demo_delay_long_seconds",
 }
 
 
@@ -114,6 +119,17 @@ def load_settings(path: str | Path) -> Settings:
     except (OSError, RuntimeError, ValueError) as error:
         raise ConfigurationError("Invalid settings CSV path") from error
     values = _read_settings(config_path)
+    delays = {
+        preset: _bounded_integer(
+            f"demo_delay_{preset}_seconds", values[f"demo_delay_{preset}_seconds"], 30
+        )
+        for preset in ("short", "medium", "long")
+    }
+    if not delays["short"] <= delays["medium"] <= delays["long"]:
+        raise ConfigurationError("Demo delays must be ordered short <= medium <= long")
+    preset = values["demo_delay_preset"]
+    if preset not in delays:
+        raise ConfigurationError("demo_delay_preset must be short, medium, or long")
     return Settings(
         portal_url=_validate_url(values["portal_url"]),
         input_csv=_resolve_path("input_csv", values["input_csv"], config_path.parent),
@@ -125,4 +141,5 @@ def load_settings(path: str | Path) -> Settings:
         download_timeout_seconds=_bounded_integer(
             "download_timeout_seconds", values["download_timeout_seconds"], 300, 1
         ),
+        demo_delay_seconds=delays[preset],
     )

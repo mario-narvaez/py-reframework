@@ -14,6 +14,10 @@ VALID_SETTINGS = {
     "max_retries": "2",
     "retry_delay_seconds": "5",
     "download_timeout_seconds": "30",
+    "demo_delay_preset": "short",
+    "demo_delay_short_seconds": "1",
+    "demo_delay_medium_seconds": "3",
+    "demo_delay_long_seconds": "5",
 }
 
 
@@ -38,6 +42,7 @@ def test_loads_settings_and_resolves_paths_relative_to_csv(tmp_path: Path) -> No
     assert settings.max_retries == 2
     assert settings.retry_delay_seconds == 5
     assert settings.download_timeout_seconds == 30
+    assert settings.demo_delay_seconds == 1
 
 
 def test_repository_settings_load() -> None:
@@ -67,6 +72,11 @@ def test_repository_settings_load() -> None:
         ("retry_delay_seconds", "301"),
         ("download_timeout_seconds", "0"),
         ("download_timeout_seconds", "301"),
+        ("demo_delay_preset", "unknown"),
+        ("demo_delay_short_seconds", "-1"),
+        ("demo_delay_medium_seconds", "1.5"),
+        ("demo_delay_long_seconds", "31"),
+        ("demo_delay_short_seconds", "4"),
     ],
 )
 def test_rejects_invalid_values(tmp_path: Path, name: str, value: str) -> None:
@@ -108,3 +118,19 @@ def test_accepts_retry_boundaries(tmp_path: Path, retries: str, delay: str) -> N
     settings = load_settings(path)
     assert settings.max_retries == int(retries)
     assert settings.retry_delay_seconds == int(delay)
+
+
+@pytest.mark.parametrize(("preset", "expected"), [("short", 1), ("medium", 3), ("long", 5)])
+def test_selects_configured_demo_delay(tmp_path: Path, preset: str, expected: int) -> None:
+    path = tmp_path / "settings.csv"
+    write_settings(path, {**VALID_SETTINGS, "demo_delay_preset": preset})
+    assert load_settings(path).demo_delay_seconds == expected
+
+
+def test_rejects_missing_demo_setting(tmp_path: Path) -> None:
+    path = tmp_path / "settings.csv"
+    settings = VALID_SETTINGS.copy()
+    del settings["demo_delay_medium_seconds"]
+    write_settings(path, settings)
+    with pytest.raises(ConfigurationError, match="demo_delay_medium_seconds"):
+        load_settings(path)

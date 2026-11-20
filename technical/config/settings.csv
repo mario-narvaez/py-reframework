@@ -5,3 +5,7 @@ output_dir,../../process/output/runs
 max_retries,1
 retry_delay_seconds,5
 download_timeout_seconds,30
+demo_delay_preset,short
+demo_delay_short_seconds,1
+demo_delay_medium_seconds,3
+demo_delay_long_seconds,5

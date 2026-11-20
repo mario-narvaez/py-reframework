@@ -28,6 +28,11 @@ dates, and downloads a text statement. The
 **downloaded files are the main output**; a separate results report shows
 which items succeeded or failed.
 
+By default, the bot shows its browser so you can watch it work. It can also
+run without showing the browser window, known as **headless mode**: it still
+visits the website and downloads files. See
+[setup and operation](docs/technical/setup-and-operation.md).
+
 If an input is invalid, the bot records the problem and moves on. It retries
 some specific temporary website errors, but stops for certain serious
 technical problems or after three technical failures without an intervening

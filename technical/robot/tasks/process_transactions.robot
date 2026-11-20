@@ -8,7 +8,7 @@ Task Teardown    Finish Batch
 
 *** Variables ***
 ${CONFIG_FILE}        ${CURDIR}${/}..${/}..${/}config${/}settings.csv
-${HEADLESS}           ${True}
+${HEADLESS}           ${False}
 ${BROWSER_OPEN}       ${False}
 ${RUN_STATE}          ${None}
 ${OUTAGE_THRESHOLD}   ${3}
@@ -105,7 +105,7 @@ Ensure Portal Session
         RETURN    ${None}
     END
     Validate Portal Credentials
-    ${http_status}=    Open Demo Portal    ${batch}[portal_url]
+    ${http_status}=    Open Demo Portal    ${batch}[portal_url]    ${batch}[demo_delay_seconds]
     IF    $http_status in (502, 503, 504)
         Capture Failure Evidence
         Close Portal Session

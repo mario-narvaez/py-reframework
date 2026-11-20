@@ -134,7 +134,11 @@ def prepare_batch(
     config.write_text(
         f"setting,value\nportal_url,http://127.0.0.1:{portal.server_port}/\n"
         "input_csv,process/input/transactions.csv\noutput_dir,process/output/runs\n"
-        f"max_retries,{retries}\nretry_delay_seconds,{delay}\ndownload_timeout_seconds,10\n",
+        f"max_retries,{retries}\nretry_delay_seconds,{delay}\ndownload_timeout_seconds,10\n"
+        "demo_delay_preset,short\n"
+        "demo_delay_short_seconds,1\n"
+        "demo_delay_medium_seconds,3\n"
+        "demo_delay_long_seconds,5\n",
         encoding="utf-8",
     )
     env = os.environ.copy()
@@ -144,6 +148,7 @@ def prepare_batch(
     command = [
         sys.executable, "-m", "robot", "--outputdir", str(tmp_path / "process" / "output" / "reports" / "robot"),
         "--variable", f"CONFIG_FILE:{config}",
+        "--variable", "HEADLESS:True",
         str(ROOT / "technical" / "robot" / "tasks" / "process_transactions.robot"),
     ]
     return command, env
@@ -238,6 +243,31 @@ def test_single_statement_uses_dated_run_download_folder(tmp_path: Path, portal)
     assert len(downloads) == 1
     assert re.fullmatch(r"\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}", downloads[0].parent.parent.name)
     assert "Date Range: 2025-01-01 to 2025-01-31" in downloads[0].read_text()
+
+
+@pytest.mark.parametrize("task", ["batch", "single"])
+def test_tasks_default_to_visible_browser(tmp_path: Path, portal, task: str) -> None:
+    command, env = prepare_batch(tmp_path, portal, "one,2025-01-01,2025-01-31\n")
+    config = tmp_path / "settings.csv"
+    settings = config.read_text(encoding="utf-8").replace("demo_delay_short_seconds,1", "demo_delay_short_seconds,0")
+    config.write_text(settings, encoding="utf-8")
+    headless_index = command.index("HEADLESS:True")
+    del command[headless_index - 1:headless_index + 1]
+    if task == "single":
+        command[-1:] = [
+            "--variable", "START_DATE:2025-01-01",
+            "--variable", "END_DATE:2025-01-31",
+            str(ROOT / "technical" / "robot" / "tasks" / "download_statement.robot"),
+        ]
+    result = subprocess.run(
+        command, cwd=tmp_path, env=env, capture_output=True, text=True, timeout=90
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    report = tmp_path / "process" / "output" / "reports" / "robot" / "output.xml"
+    root = ET.parse(report).getroot()
+    browsers = successful_keywords(root, "New Browser")
+    assert len(browsers) == 1
+    assert "headless=${False}" in [argument.text for argument in browsers[0].findall("arg")]
 
 
 def test_batch_continues_after_statement_verification_failure(
