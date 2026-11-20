@@ -19,7 +19,11 @@ def config_path(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
         "output_dir,output\n"
         "max_retries,2\n"
         "retry_delay_seconds,5\n"
-        "download_timeout_seconds,30\n",
+        "download_timeout_seconds,30\n"
+        "demo_delay_preset,short\n"
+        "demo_delay_short_seconds,1\n"
+        "demo_delay_medium_seconds,3\n"
+        "demo_delay_long_seconds,5\n",
         encoding="utf-8",
     )
     monkeypatch.setenv("PORTAL_USERNAME", "demo-user")
@@ -31,6 +35,7 @@ def test_prepares_distinct_download_locations(config_path: Path) -> None:
     first = prepare_statement_request(str(config_path), "2025-01-01", "2025-01-31")
     second = prepare_statement_request(str(config_path), "2025-01-01", "2025-01-31")
     assert first["portal_url"] == "https://example.com/"
+    assert first["demo_delay_seconds"] == 1
     assert first["download_path"] != second["download_path"]
     first_path = Path(first["download_path"])
     assert first_path.name == "statement-001.txt"
@@ -116,3 +121,55 @@ def test_robot_stops_before_browser_for_invalid_date(config_path: Path) -> None:
     assert result.returncode != 0
     assert "start_date must be a valid calendar date" in result.stdout
     assert not (config_path.parent / "output").exists()
+
+
+def test_robot_applies_demo_pacing_only_to_visible_browsers(tmp_path: Path) -> None:
+    root = Path(__file__).resolve().parents[2]
+    resource = root / "technical" / "robot" / "resources" / "demo_portal.resource"
+    resource_path = str(resource).replace("\\", "${/}")
+    suite = tmp_path / "pacing.robot"
+    suite.write_text(
+        f"""*** Settings ***
+Resource    {resource_path}
+
+*** Test Cases ***
+Visible Browser Uses The Chosen Delay
+    Set Suite Variable    ${{HEADLESS}}    False
+    Set Suite Variable    ${{EXPECTED_HEADLESS}}    ${{False}}
+    Set Suite Variable    ${{EXPECTED_DELAY}}    3 seconds
+    Open Demo Portal    https://example.com/    3
+
+Headless Browser Has No Added Delay
+    Set Suite Variable    ${{HEADLESS}}    ${{True}}
+    Set Suite Variable    ${{EXPECTED_HEADLESS}}    ${{True}}
+    Set Suite Variable    ${{EXPECTED_DELAY}}    not-set
+    Open Demo Portal    https://example.com/    3
+
+*** Keywords ***
+New Browser
+    [Arguments]    ${{browser}}    ${{headless}}    ${{slowMo}}=not-set
+    Should Be Equal    ${{headless}}    ${{EXPECTED_HEADLESS}}
+    Should Be Equal    ${{slowMo}}    ${{EXPECTED_DELAY}}
+
+New Context
+    [Arguments]    ${{acceptDownloads}}
+    No Operation
+
+New Page
+    No Operation
+
+Go To
+    [Arguments]    ${{url}}
+    RETURN    ${{200}}
+""",
+        encoding="utf-8",
+    )
+    result = subprocess.run(
+        [sys.executable, "-m", "robot", "--outputdir", str(tmp_path / "robot"), str(suite)],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr

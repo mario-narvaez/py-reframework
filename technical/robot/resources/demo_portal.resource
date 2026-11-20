@@ -7,8 +7,13 @@ ${BANKING_LINK}    data-testid=sidebar >> css=a[href$="/banking"]
 
 *** Keywords ***
 Open Demo Portal
-    [Arguments]    ${portal_url}
-    New Browser    chromium    headless=${HEADLESS}
+    [Arguments]    ${portal_url}    ${demo_delay_seconds}
+    ${headless}=    Convert To Boolean    ${HEADLESS}
+    IF    ${headless}
+        New Browser    chromium    headless=${True}
+    ELSE
+        New Browser    chromium    headless=${False}    slowMo=${demo_delay_seconds} seconds
+    END
     Set Suite Variable    ${BROWSER_OPEN}    ${True}
     New Context    acceptDownloads=${True}
     New Page

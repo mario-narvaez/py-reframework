@@ -24,7 +24,11 @@ def paths(tmp_path: Path) -> tuple[Path, Path]:
         "output_dir,output\n"
         "max_retries,2\n"
         "retry_delay_seconds,5\n"
-        "download_timeout_seconds,30\n",
+        "download_timeout_seconds,30\n"
+        "demo_delay_preset,short\n"
+        "demo_delay_short_seconds,1\n"
+        "demo_delay_medium_seconds,3\n"
+        "demo_delay_long_seconds,5\n",
         encoding="utf-8",
     )
     return config, input_path
@@ -43,6 +47,7 @@ def test_validates_each_row_and_creates_distinct_run_reports(
         encoding="utf-8",
     )
     batch = initialize_batch(str(config))
+    assert batch["demo_delay_seconds"] == 1
     assert batch["transactions"][0]["error"] == ""
     assert "calendar date" in batch["transactions"][1]["error"]
     assert "unique" in batch["transactions"][2]["error"]

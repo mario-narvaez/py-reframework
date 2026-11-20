@@ -76,6 +76,7 @@ def prepare_statement_request(config_path: str, start_date: str, end_date: str) 
         "end_date": end,
         "download_path": reserve_statement_path(run_dir, 1),
         "download_timeout_seconds": settings.download_timeout_seconds,
+        "demo_delay_seconds": settings.demo_delay_seconds,
     }
 
 
