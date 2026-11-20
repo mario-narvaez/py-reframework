@@ -2,8 +2,8 @@
 
 import os
 import re
-import tempfile
-from datetime import date
+from datetime import date, datetime
+from itertools import count
 from pathlib import Path
 
 from robot.api.deco import keyword
@@ -35,13 +35,32 @@ def validate_portal_credentials() -> None:
             raise ConfigurationError(f"Environment variable {name} must be set")
 
 
-def reserve_statement_path(output_dir: Path) -> str:
+def create_run_directory(output_dir: Path) -> Path:
     try:
         output_dir.mkdir(parents=True, exist_ok=True)
-        run_dir = Path(tempfile.mkdtemp(prefix="statement-", dir=output_dir))
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        for number in count(1):
+            name = timestamp if number == 1 else f"{timestamp}-{number:02d}"
+            run_dir = output_dir / name
+            try:
+                run_dir.mkdir()
+                return run_dir
+            except FileExistsError:
+                continue
     except OSError as error:
-        raise SystemFailure(f"Cannot create download directory: {output_dir}") from error
-    return str(run_dir / "statement.txt")
+        raise SystemFailure(f"Cannot create run directory in: {output_dir}") from error
+
+
+def reserve_statement_path(run_dir: Path, number: int) -> str:
+    downloads_dir = run_dir / "downloads"
+    try:
+        downloads_dir.mkdir(parents=True, exist_ok=True)
+        path = downloads_dir / f"statement-{number:03d}.txt"
+        if path.exists():
+            raise SystemFailure(f"Statement path already exists: {path}")
+    except OSError as error:
+        raise SystemFailure(f"Cannot create download directory: {downloads_dir}") from error
+    return str(path)
 
 
 @keyword
@@ -50,11 +69,12 @@ def prepare_statement_request(config_path: str, start_date: str, end_date: str) 
     settings = load_settings(config_path)
     start, end = validate_date_range(start_date, end_date)
     validate_portal_credentials()
+    run_dir = create_run_directory(settings.output_dir)
     return {
         "portal_url": settings.portal_url,
         "start_date": start,
         "end_date": end,
-        "download_path": reserve_statement_path(settings.output_dir),
+        "download_path": reserve_statement_path(run_dir, 1),
         "download_timeout_seconds": settings.download_timeout_seconds,
     }
 

@@ -45,13 +45,13 @@ must be verified for the target process and its effects on external systems.
 | Component | Current role | Invoice or PO adaptation |
 | --- | --- | --- |
 | Robot Framework and Browser Library | Run keywords, browser actions, and execution reports. | The tools are reusable; dependencies or versions may need changes. |
-| [Batch task](../../robot/tasks/process_transactions.robot) | Coordinates date-range rows, retry decisions, outcome recording, and cleanup. | Use the lifecycle as a starting point; adapt process steps and error/recovery decisions. It is not a generic transaction engine. |
-| [Portal resource](../../robot/resources/demo_portal.resource) | Implements demo login, navigation, selectors, and downloads. | Replace or adapt authentication, navigation, search, selectors, and download actions for the authorized portal. |
-| [Transaction handling](../../src/py_reframework/transactions.py) | Reads the date-range CSV and writes the demo results. | Change the input and result schemas, row validation, and identifiers. Keep or adapt CSV safety as appropriate. |
-| [Portal support](../../src/py_reframework/portal_support.py) | Validates dates, checks credentials, creates paths, and verifies demo text. | Replace date and statement-specific checks with invoice or PO rules and output verification. Review path and credential handling. |
-| [Configuration loader](../../src/py_reframework/config.py) and [settings](../../config/settings.csv) | Validate this bot's URL, paths, and operational settings. | Update values and adapt the schema and validation for the new process. |
-| [Failure types](../../src/py_reframework/exceptions.py) | Define business and system failure categories. | Use the categories as a starting point, but classify and handle the new process's failures explicitly. |
-| [Tests](../../tests/) | Check settings, Python behavior, selectors, and the demo workflow with a local mock. | Adapt fixtures and add tests for the new portal, rules, failures, and output. |
+| [Batch task](../../technical/robot/tasks/process_transactions.robot) | Coordinates date-range rows, retry decisions, outcome recording, and cleanup. | Use the lifecycle as a starting point; adapt process steps and error/recovery decisions. It is not a generic transaction engine. |
+| [Portal resource](../../technical/robot/resources/demo_portal.resource) | Implements demo login, navigation, selectors, and downloads. | Replace or adapt authentication, navigation, search, selectors, and download actions for the authorized portal. |
+| [Transaction handling](../../technical/python_code/py_reframework/transactions.py) | Reads the date-range CSV and writes the demo results. | Change the input and result schemas, row validation, and identifiers. Keep or adapt CSV safety as appropriate. |
+| [Portal support](../../technical/python_code/py_reframework/portal_support.py) | Validates dates, checks credentials, creates paths, and verifies demo text. | Replace date and statement-specific checks with invoice or PO rules and output verification. Review path and credential handling. |
+| [Configuration loader](../../technical/python_code/py_reframework/config.py) and [settings](../../technical/config/settings.csv) | Validate this bot's URL, paths, and operational settings. | Update values and adapt the schema and validation for the new process. |
+| [Failure types](../../technical/python_code/py_reframework/exceptions.py) | Define business and system failure categories. | Use the categories as a starting point, but classify and handle the new process's failures explicitly. |
+| [Tests](../../technical/tests/) | Check settings, Python behavior, selectors, and the demo workflow with a local mock. | Adapt fixtures and add tests for the new portal, rules, failures, and output. |
 
 For example, an invoice that does not exist might be a business failure if
 the process owner agrees. An unavailable portal might be a system failure.

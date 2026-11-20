@@ -32,7 +32,10 @@ def test_prepares_distinct_download_locations(config_path: Path) -> None:
     second = prepare_statement_request(str(config_path), "2025-01-01", "2025-01-31")
     assert first["portal_url"] == "https://example.com/"
     assert first["download_path"] != second["download_path"]
-    assert Path(first["download_path"]).parent.is_dir()
+    first_path = Path(first["download_path"])
+    assert first_path.name == "statement-001.txt"
+    assert first_path.parent.name == "downloads"
+    assert first_path.parent.is_dir()
 
 
 @pytest.mark.parametrize(
@@ -81,9 +84,9 @@ def test_missing_statement_is_a_system_failure(tmp_path: Path) -> None:
 
 
 def test_robot_stops_before_browser_for_invalid_date(config_path: Path) -> None:
-    root = Path(__file__).resolve().parents[1]
+    root = Path(__file__).resolve().parents[2]
     env = os.environ.copy()
-    env["PYTHONPATH"] = str(root / "src")
+    env["PYTHONPATH"] = str(root / "technical" / "python_code")
     result = subprocess.run(
         [
             sys.executable,
@@ -101,7 +104,7 @@ def test_robot_stops_before_browser_for_invalid_date(config_path: Path) -> None:
             "START_DATE:2025-02-30",
             "--variable",
             "END_DATE:2025-03-01",
-            str(root / "robot" / "tasks" / "download_statement.robot"),
+            str(root / "technical" / "robot" / "tasks" / "download_statement.robot"),
         ],
         cwd=root,
         env=env,

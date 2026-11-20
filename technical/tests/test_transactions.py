@@ -1,10 +1,16 @@
 import csv
+from datetime import datetime
 from pathlib import Path
 
 import pytest
 
 from py_reframework.exceptions import ConfigurationError, SystemFailure
-from py_reframework.transactions import initialize_batch, record_transaction_result
+from py_reframework.portal_support import prepare_statement_request
+from py_reframework.transactions import (
+    initialize_batch,
+    record_transaction_result,
+    reserve_batch_statement_path,
+)
 
 
 @pytest.fixture
@@ -52,6 +58,64 @@ def test_validates_each_row_and_creates_distinct_run_reports(
     assert [row["status"] for row in rows] == ["success", "business_failure"]
     assert rows[0]["download_path"] == "statement.txt"
     assert rows[1]["download_path"] == ""
+
+
+def test_same_second_runs_and_statement_paths_are_distinct(
+    paths: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    class FixedDateTime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return cls(2026, 11, 20, 13, 51, 54)
+
+    monkeypatch.setattr("py_reframework.portal_support.datetime", FixedDateTime)
+    config, input_path = paths
+    input_path.write_text(
+        "transaction_id,start_date,end_date\n"
+        "one,2025-01-01,2025-01-31\n",
+        encoding="utf-8",
+    )
+    first = initialize_batch(str(config))
+    second = initialize_batch(str(config))
+    monkeypatch.setenv("PORTAL_USERNAME", "demo-user")
+    monkeypatch.setenv("PORTAL_PASSWORD", "demo-password")
+    single = prepare_statement_request(str(config), "2025-01-01", "2025-01-31")
+    assert Path(first["run_dir"]).name == "2026-11-20_13-51-54"
+    assert Path(second["run_dir"]).name == "2026-11-20_13-51-54-02"
+    assert Path(single["download_path"]).parent.parent.name == "2026-11-20_13-51-54-03"
+    first_path = Path(reserve_batch_statement_path(first))
+    second_path = Path(reserve_batch_statement_path(first))
+    assert first_path == Path(first["run_dir"]) / "downloads" / "statement-001.txt"
+    assert second_path == Path(first["run_dir"]) / "downloads" / "statement-002.txt"
+    assert first_path.parent.is_dir()
+
+
+def test_existing_statement_is_not_overwritten(paths: tuple[Path, Path]) -> None:
+    config, input_path = paths
+    input_path.write_text(
+        "transaction_id,start_date,end_date\n"
+        "one,2025-01-01,2025-01-31\n",
+        encoding="utf-8",
+    )
+    batch = initialize_batch(str(config))
+    target = Path(batch["run_dir"]) / "downloads" / "statement-001.txt"
+    target.parent.mkdir()
+    target.write_text("existing", encoding="utf-8")
+    with pytest.raises(SystemFailure, match="Statement path already exists"):
+        reserve_batch_statement_path(batch)
+    assert target.read_text(encoding="utf-8") == "existing"
+
+
+def test_run_directory_creation_failure_is_reported(paths: tuple[Path, Path]) -> None:
+    config, input_path = paths
+    input_path.write_text(
+        "transaction_id,start_date,end_date\n"
+        "one,2025-01-01,2025-01-31\n",
+        encoding="utf-8",
+    )
+    (config.parent / "output").write_text("not a directory", encoding="utf-8")
+    with pytest.raises(SystemFailure, match="Cannot create run directory"):
+        initialize_batch(str(config))
 
 
 @pytest.mark.parametrize(

@@ -226,6 +226,7 @@ __marimo__/
 
 # Generated automation results and Robot Framework reports
 /output/
+/process/output/
 /output.xml
 /log.html
 /report.html

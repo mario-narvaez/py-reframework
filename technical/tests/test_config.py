@@ -9,8 +9,8 @@ from py_reframework.exceptions import ConfigurationError, SystemFailure
 
 VALID_SETTINGS = {
     "portal_url": "https://example.com/demo/",
-    "input_csv": "../data/transactions.csv",
-    "output_dir": "../output",
+    "input_csv": "../process/input/transactions.csv",
+    "output_dir": "../process/output/runs",
     "max_retries": "2",
     "retry_delay_seconds": "5",
     "download_timeout_seconds": "30",
@@ -33,8 +33,8 @@ def test_loads_settings_and_resolves_paths_relative_to_csv(tmp_path: Path) -> No
     settings = load_settings(path)
 
     assert settings.portal_url == "https://example.com/demo/"
-    assert settings.input_csv == tmp_path / "data" / "transactions.csv"
-    assert settings.output_dir == tmp_path / "output"
+    assert settings.input_csv == tmp_path / "process" / "input" / "transactions.csv"
+    assert settings.output_dir == tmp_path / "process" / "output" / "runs"
     assert settings.max_retries == 2
     assert settings.retry_delay_seconds == 5
     assert settings.download_timeout_seconds == 30
@@ -44,6 +44,9 @@ def test_repository_settings_load() -> None:
     path = Path(__file__).resolve().parents[1] / "config" / "settings.csv"
     settings = load_settings(path)
     assert settings.portal_url == "https://hash-chandra.github.io/demowebapp/"
+    assert settings.input_csv == path.parents[2] / "process" / "input" / "transactions.csv"
+    assert settings.input_csv.is_file()
+    assert settings.output_dir == path.parents[2] / "process" / "output" / "runs"
     assert settings.max_retries == 1
     assert settings.retry_delay_seconds == 5
 

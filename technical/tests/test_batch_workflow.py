@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 
 PAGE = """<!doctype html>
 <nav><a href="/login">Login</a></nav>
@@ -125,30 +125,32 @@ def prepare_batch(
     tmp_path: Path, portal, rows: str, delay: int = 0, username: str = "admin",
     retries: int = 1, password: str = "admin123",
 ):
-    (tmp_path / "input.csv").write_text(
+    input_dir = tmp_path / "process" / "input"
+    input_dir.mkdir(parents=True, exist_ok=True)
+    (input_dir / "transactions.csv").write_text(
         "transaction_id,start_date,end_date\n" + rows, encoding="utf-8"
     )
     config = tmp_path / "settings.csv"
     config.write_text(
         f"setting,value\nportal_url,http://127.0.0.1:{portal.server_port}/\n"
-        "input_csv,input.csv\noutput_dir,output\n"
+        "input_csv,process/input/transactions.csv\noutput_dir,process/output/runs\n"
         f"max_retries,{retries}\nretry_delay_seconds,{delay}\ndownload_timeout_seconds,10\n",
         encoding="utf-8",
     )
     env = os.environ.copy()
-    env["PYTHONPATH"] = str(ROOT / "src")
+    env["PYTHONPATH"] = str(ROOT / "technical" / "python_code")
     env["PORTAL_USERNAME"] = username
     env["PORTAL_PASSWORD"] = password
     command = [
-        sys.executable, "-m", "robot", "--outputdir", str(tmp_path / "robot"),
+        sys.executable, "-m", "robot", "--outputdir", str(tmp_path / "process" / "output" / "reports" / "robot"),
         "--variable", f"CONFIG_FILE:{config}",
-        str(ROOT / "robot" / "tasks" / "process_transactions.robot"),
+        str(ROOT / "technical" / "robot" / "tasks" / "process_transactions.robot"),
     ]
     return command, env
 
 
 def read_results(tmp_path: Path) -> list[dict]:
-    reports = list((tmp_path / "output").glob("run-*/results.csv"))
+    reports = list((tmp_path / "process" / "output" / "runs").glob("*/results.csv"))
     assert len(reports) == 1
     with reports[0].open(encoding="utf-8", newline="") as file:
         return list(csv.DictReader(file))
@@ -164,7 +166,8 @@ def successful_keywords(root: ET.Element, name: str) -> list[ET.Element]:
 
 
 def assert_failure_screenshot(tmp_path: Path, parent_keyword: str) -> None:
-    root = ET.parse(tmp_path / "robot" / "output.xml").getroot()
+    robot_reports = tmp_path / "process" / "output" / "reports" / "robot"
+    root = ET.parse(robot_reports / "output.xml").getroot()
     captures = [
         capture
         for parent in successful_keywords(root, parent_keyword)
@@ -183,7 +186,7 @@ def assert_failure_screenshot(tmp_path: Path, parent_keyword: str) -> None:
         for match in re.findall(r'href="([^"]+\.png)"', message.text or "")
     ]
     assert links, "The failure screenshot was not linked in Robot's output"
-    assert any((tmp_path / "robot").joinpath(*link.split("/")).is_file() for link in links)
+    assert any(robot_reports.joinpath(*link.split("/")).is_file() for link in links)
 
 
 def run_batch(
@@ -208,10 +211,33 @@ def test_batch_continues_after_business_failure_and_downloads_each_valid_row(
     assert [row["status"] for row in rows] == ["success", "business_failure", "success"]
     paths = [Path(row["download_path"]) for row in rows if row["status"] == "success"]
     assert len(set(paths)) == 2
+    assert [path.name for path in paths] == ["statement-001.txt", "statement-002.txt"]
+    assert paths[0].parent == paths[1].parent
+    assert paths[0].parent.name == "downloads"
+    assert re.fullmatch(r"\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}", paths[0].parent.parent.name)
     for path, row in zip(paths, (rows[0], rows[2])):
         assert f"Date Range: {row['start_date']} to {row['end_date']}" in path.read_text()
     assert not rows[1]["download_path"]
     assert [row["attempts"] for row in rows] == ["1", "0", "1"]
+
+
+def test_single_statement_uses_dated_run_download_folder(tmp_path: Path, portal) -> None:
+    command, env = prepare_batch(tmp_path, portal, "")
+    command[-1:] = [
+        "--variable", "START_DATE:2025-01-01",
+        "--variable", "END_DATE:2025-01-31",
+        str(ROOT / "technical" / "robot" / "tasks" / "download_statement.robot"),
+    ]
+    result = subprocess.run(
+        command, cwd=tmp_path, env=env, capture_output=True, text=True, timeout=90
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    downloads = list(
+        (tmp_path / "process" / "output" / "runs").glob("*/downloads/statement-001.txt")
+    )
+    assert len(downloads) == 1
+    assert re.fullmatch(r"\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}", downloads[0].parent.parent.name)
+    assert "Date Range: 2025-01-01 to 2025-01-31" in downloads[0].read_text()
 
 
 def test_batch_continues_after_statement_verification_failure(
@@ -246,7 +272,7 @@ def test_temporary_http_failure_retries_in_a_new_browser_session(
     assert "retrying" in result.stdout
     assert "1 succeeded, 0 business failures, 0 system failures" in result.stdout
     assert_failure_screenshot(tmp_path, "Ensure Portal Session")
-    root = ET.parse(tmp_path / "robot" / "output.xml").getroot()
+    root = ET.parse(tmp_path / "process" / "output" / "reports" / "robot" / "output.xml").getroot()
     browser_events = [
         keyword.get("name")
         for keyword in root.iter("kw")
@@ -332,7 +358,9 @@ def test_permanent_failures_stop_without_retry(
     assert rows[0]["attempts"] == "1"
     assert portal.requests == 1
     assert "retrying" not in result.stdout
-    output = (tmp_path / "robot" / "output.xml").read_text(encoding="utf-8")
+    output = (
+        tmp_path / "process" / "output" / "reports" / "robot" / "output.xml"
+    ).read_text(encoding="utf-8")
     failures = [
         message.text for message in ET.fromstring(output).iter("msg")
         if message.get("level") == "FAIL"
