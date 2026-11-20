@@ -42,7 +42,7 @@ variables in the current PowerShell session.
 
 ## Configuration
 
-[config/settings.csv](../../config/settings.csv) uses `setting,value`
+[technical/config/settings.csv](../../technical/config/settings.csv) uses `setting,value`
 columns. It supplies the portal URL, input CSV path, output directory,
 maximum retries, retry delay, and download timeout. Paths are resolved
 relative to the settings file's directory.
@@ -50,8 +50,8 @@ relative to the settings file's directory.
 | Setting | Meaning | Valid range / sample value |
 | --- | --- | --- |
 | `portal_url` | Initial portal page. | HTTP(S) URL without credentials or a fragment. |
-| `input_csv` | Transaction input file. | `../data/transactions.csv` |
-| `output_dir` | Parent directory for run folders. | `../output` |
+| `input_csv` | Transaction input file. | `../../process/input/transactions.csv` |
+| `output_dir` | Parent directory for run folders. | `../../process/output/runs` |
 | `max_retries` | Additional attempts after the first. | 0-10; sample: 1. |
 | `retry_delay_seconds` | Wait before a retry. | 0-300 seconds; sample: 5. |
 | `download_timeout_seconds` | Download wait limit. | 1-300 seconds; sample: 30. |
@@ -67,12 +67,12 @@ use the returned `Settings` object. For Python commands outside pytest, make
 the source directory importable in the current session:
 
 ```powershell
-$env:PYTHONPATH = (Join-Path (Get-Location) 'src')
+$env:PYTHONPATH = (Join-Path (Get-Location) 'technical\python_code')
 ```
 
 ## Prepare input
 
-Edit [data/transactions.csv](../../data/transactions.csv), or set `input_csv`
+Edit [process/input/transactions.csv](../../process/input/transactions.csv), or set `input_csv`
 to another CSV. The header must match exactly, with one row per transaction:
 
 ```csv
@@ -91,24 +91,50 @@ all-successful run.
 ## Run a batch
 
 ```powershell
-$env:PYTHONPATH = (Join-Path (Get-Location) 'src')
+$env:PYTHONPATH = (Join-Path (Get-Location) 'technical\python_code')
 $env:PLAYWRIGHT_BROWSERS_PATH = (Join-Path (Get-Location) '.venv\ms-playwright')
 $env:PORTAL_USERNAME = 'admin'
 $env:PORTAL_PASSWORD = 'admin123'
-.\.venv\Scripts\python.exe -m robot --outputdir output\robot `
-    robot\tasks\process_transactions.robot
+.\.venv\Scripts\python.exe -m robot --outputdir process\output\reports\robot `
+    technical\robot\tasks\process_transactions.robot
 ```
 
 The credentials above are the practice site's public values. The task runs
 headlessly by default; add `--variable HEADLESS:False` before the task path to
-see the browser.
+see the browser. A simple launcher is being considered for the future; it is
+not implemented.
 
 ### Outputs
 
 Downloaded text statements are the **primary output**. Each run creates a
-unique folder under the configured output directory, with a separate
-`statement-.../statement.txt` for each download. The statement contains
-the requested dates and placeholder text, not actual transaction records.
+folder under the configured output directory named with the computer's local
+date and time, for example `2026-11-20_13-51-54`. Runs started in the same
+second receive suffixes such as `-02` to prevent overwriting.
+
+The batch places `results.csv` in the run folder and numbers downloads in its
+`downloads/` subfolder, for example `statement-001.txt` and
+`statement-002.txt`. The statement contains the requested dates and
+placeholder text, not actual transaction records.
+
+With the sample settings, a batch looks like this:
+
+```text
+process/
+  input/transactions.csv
+  output/
+    runs/2026-11-20_13-51-54/
+      results.csv
+      downloads/
+        statement-001.txt
+        statement-002.txt
+    reports/robot/
+      log.html
+      report.html
+      output.xml
+```
+
+The console shows the actual `results.csv` path. Existing files in the former
+`output/` directory are not automatically moved or deleted.
 
 The run's `results.csv` is a secondary tracking report:
 
@@ -124,10 +150,11 @@ To reduce spreadsheet formula risks, values beginning with `=`, `+`, `-`,
 or `@`, including after whitespace, are prefixed with an apostrophe in the
 report. Treat CSV files as untrusted when opening them in spreadsheet software.
 
-Robot writes `output.xml`, `log.html`, and `report.html` to `output/robot/`
-for the command above. Inspect `log.html` for execution details and failure
-information. A later run using the same Robot output directory can overwrite
-those reports; run folders and downloaded files are unique.
+Robot writes `output.xml`, `log.html`, and `report.html` to
+`process/output/reports/robot/` for the command above. Inspect `log.html`
+for execution details and failure information. A later run using the same
+Robot output directory can overwrite those reports; run folders and downloaded
+files are unique.
 
 ### Failures, retries, and partial runs
 
@@ -169,18 +196,19 @@ and screenshots still require care.
 After setup, use the public demo credentials:
 
 ```powershell
-$env:PYTHONPATH = (Join-Path (Get-Location) 'src')
+$env:PYTHONPATH = (Join-Path (Get-Location) 'technical\python_code')
 $env:PLAYWRIGHT_BROWSERS_PATH = (Join-Path (Get-Location) '.venv\ms-playwright')
 $env:PORTAL_USERNAME = 'admin'
 $env:PORTAL_PASSWORD = 'admin123'
-.\.venv\Scripts\python.exe -m robot --outputdir output\robot `
+.\.venv\Scripts\python.exe -m robot --outputdir process\output\reports\robot `
     --variable START_DATE:2025-01-01 --variable END_DATE:2025-01-31 `
-    robot\tasks\download_statement.robot
+    technical\robot\tasks\download_statement.robot
 ```
 
 Replace the dates with a valid `YYYY-MM-DD` range. Add
 `--variable HEADLESS:False` before the task path to see the browser. The
-statement is saved in a unique folder under the configured output directory;
+statement is saved as `downloads/statement-001.txt` inside a dated run folder
+under the configured output directory. This task does not create a results CSV;
 inspect `log.html` for its path and execution details. The task returns a
 nonzero exit code on failure. It does not retry automatically.
 
@@ -200,5 +228,5 @@ Run the local selector checks separately:
 
 ```powershell
 $env:PLAYWRIGHT_BROWSERS_PATH = (Join-Path (Get-Location) '.venv\ms-playwright')
-.\.venv\Scripts\python.exe -m robot --outputdir output\selector-tests tests\robot\selector_contract.robot
+.\.venv\Scripts\python.exe -m robot --outputdir process\output\reports\selector-tests technical\tests\robot\selector_contract.robot
 ```

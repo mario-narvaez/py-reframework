@@ -1,14 +1,13 @@
 """Read date-range transactions and record outcomes for a single run."""
 
 import csv
-import tempfile
 from pathlib import Path
 
 from robot.api.deco import keyword
 
 from .config import load_settings
 from .exceptions import BusinessRuleError, ConfigurationError, SystemFailure
-from .portal_support import reserve_statement_path, validate_date_range
+from .portal_support import create_run_directory, reserve_statement_path, validate_date_range
 
 _INPUT_COLUMNS = ["transaction_id", "start_date", "end_date"]
 _RESULT_COLUMNS = _INPUT_COLUMNS + ["status", "attempts", "download_path", "error"]
@@ -67,9 +66,8 @@ def initialize_batch(config_path: str) -> dict:
     """Validate input and create a unique run folder with a results CSV."""
     settings = load_settings(config_path)
     transactions = _read_transactions(settings.input_csv)
+    run_dir = create_run_directory(settings.output_dir)
     try:
-        settings.output_dir.mkdir(parents=True, exist_ok=True)
-        run_dir = Path(tempfile.mkdtemp(prefix="run-", dir=settings.output_dir))
         results_path = run_dir / "results.csv"
         with results_path.open("x", encoding="utf-8", newline="") as file:
             csv.writer(file).writerow(_RESULT_COLUMNS)
@@ -83,12 +81,16 @@ def initialize_batch(config_path: str) -> dict:
         "run_dir": str(run_dir),
         "results_path": str(results_path),
         "transactions": transactions,
+        "next_statement_number": 1,
     }
 
 
 @keyword
 def reserve_batch_statement_path(batch: dict) -> str:
-    return reserve_statement_path(Path(batch["run_dir"]))
+    number = batch["next_statement_number"]
+    path = reserve_statement_path(Path(batch["run_dir"]), number)
+    batch["next_statement_number"] = number + 1
+    return path
 
 
 @keyword

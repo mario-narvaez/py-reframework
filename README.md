@@ -44,6 +44,8 @@ for the exact rules.
   or other real business data. Those are possible future adaptations.
 - It cannot resume an interrupted batch automatically. Rerunning can
   download an item again, even if an earlier run succeeded.
+- The bot is started from PowerShell. A simple launcher is being considered
+  as a future improvement, but it has not been implemented.
 
 Use only the site's public demo credentials and fictional sample data. Do
 not enter real passwords or personal information on the practice site.

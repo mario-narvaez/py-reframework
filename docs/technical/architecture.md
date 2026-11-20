@@ -90,28 +90,30 @@ There is no durable restart, cross-run deduplication, or multi-worker queue.
 
 ## File map
 
-Documentation is grouped by audience. The other files are implementation,
-configuration, sample data, or project metadata; their locations have not
-been changed.
+Documentation is grouped by audience. The `process/` folder holds sample
+input and generated output. The `technical/` folder groups the implementation,
+configuration, and tests; project metadata and tool configuration remain at
+the repository root.
 
 | Category | Files or folders | Purpose |
 | --- | --- | --- |
 | General documentation | [README.md](../../README.md), [business use cases](../general/use-cases.md) | Project overview and potential business applications. |
 | Technical documentation | [Architecture](architecture.md), [setup and operation](setup-and-operation.md), [adaptation guide](adaptation-guide.md) | Design, execution, and guidance for developers. |
-| Sample input | [data/transactions.csv](../../data/transactions.csv) | Example date ranges, including one deliberately invalid row. |
-| Non-secret configuration | [config/settings.csv](../../config/settings.csv), [.env.example](../../.env.example) | Runtime settings and placeholder environment-variable names. The project does not load `.env` files. |
-| Robot orchestration | [robot/tasks/process_transactions.robot](../../robot/tasks/process_transactions.robot), [robot/tasks/download_statement.robot](../../robot/tasks/download_statement.robot) | Batch and individual-statement tasks. |
-| Portal actions | [robot/resources/demo_portal.resource](../../robot/resources/demo_portal.resource) | Demo selectors, navigation, download, screenshots, and cleanup. |
-| Python configuration | [src/py_reframework/config.py](../../src/py_reframework/config.py) | Settings parsing, validation, and path resolution. |
-| Python transaction handling | [src/py_reframework/transactions.py](../../src/py_reframework/transactions.py) | CSV input, row outcomes, and results reporting. |
-| Python portal support | [src/py_reframework/portal_support.py](../../src/py_reframework/portal_support.py) | Date validation, credential presence, paths, and content verification. |
-| Python failure types | [src/py_reframework/exceptions.py](../../src/py_reframework/exceptions.py) | Business and system exception categories. |
-| Tests | [tests/](../../tests/) | Python behavior, local mock-portal workflow, and Robot selector checks. |
+| Sample input | [process/input/transactions.csv](../../process/input/transactions.csv) | Example date ranges, including one deliberately invalid row. |
+| Non-secret configuration | [technical/config/settings.csv](../../technical/config/settings.csv), [.env.example](../../.env.example) | Runtime settings and placeholder environment-variable names. The project does not load `.env` files. |
+| Robot orchestration | [technical/robot/tasks/process_transactions.robot](../../technical/robot/tasks/process_transactions.robot), [technical/robot/tasks/download_statement.robot](../../technical/robot/tasks/download_statement.robot) | Batch and individual-statement tasks. |
+| Portal actions | [technical/robot/resources/demo_portal.resource](../../technical/robot/resources/demo_portal.resource) | Demo selectors, navigation, download, screenshots, and cleanup. |
+| Python configuration | [technical/python_code/py_reframework/config.py](../../technical/python_code/py_reframework/config.py) | Settings parsing, validation, and path resolution. |
+| Python transaction handling | [technical/python_code/py_reframework/transactions.py](../../technical/python_code/py_reframework/transactions.py) | CSV input, row outcomes, and results reporting. |
+| Python portal support | [technical/python_code/py_reframework/portal_support.py](../../technical/python_code/py_reframework/portal_support.py) | Date validation, credential presence, paths, and content verification. |
+| Python failure types | [technical/python_code/py_reframework/exceptions.py](../../technical/python_code/py_reframework/exceptions.py) | Business and system exception categories. |
+| Tests | [technical/tests/](../../technical/tests/) | Python behavior, local mock-portal workflow, and Robot selector checks. |
 | Development configuration | [requirements.txt](../../requirements.txt), [pytest.ini](../../pytest.ini), [.gitignore](../../.gitignore), [.github/copilot-instructions.md](../../.github/copilot-instructions.md) | Dependencies, test configuration, ignored files, and project instructions. |
-| Project metadata | [LICENSE](../../LICENSE), [src/py_reframework/__init__.py](../../src/py_reframework/__init__.py), `.gitkeep` files | License, package marker, and empty-folder placeholders. |
+| Project metadata | [LICENSE](../../LICENSE), [technical/python_code/py_reframework/__init__.py](../../technical/python_code/py_reframework/__init__.py), `.gitkeep` files | License, package marker, and empty-folder placeholders. |
 
-Generated files under the default `output/` directory and virtual
-environments are excluded from Git. If reports or screenshots are saved
+Generated files under the default `process/output/` directory and virtual
+environments are excluded from Git. The previous `output/` directory remains
+ignored for older generated files. If reports or screenshots are saved
 elsewhere, check the ignore rules before committing. Treat downloaded files,
 logs, and screenshots as potentially sensitive.
 
