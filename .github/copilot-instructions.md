@@ -44,6 +44,12 @@ structured data for consolidation.
 - Define clear inputs and outputs between Robot keywords and Python libraries.
   Do not assume Robot catches Python exception classes directly; use an
   explicit, testable outcome or error contract at that boundary.
+- Select web elements using verified, stable identifiers: prefer accessible
+  roles and names or intentional test IDs; scope to a meaningful container
+  when needed. Use CSS or XPath when better identifiers are unavailable.
+  Avoid screen coordinates, generated attributes, long structural paths, and
+  positional selection unless necessary. Keep Browser's strict matching on
+  and verify that selectors identify the intended element.
 - Prefer CSV for transaction input, output, and non-secret settings when
   appropriate. Keep configuration centralized and validate required settings,
   types, and paths. Avoid hardcoding environment-specific URLs, credentials,
