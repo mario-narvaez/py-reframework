@@ -65,6 +65,27 @@ def test_validates_each_row_and_creates_distinct_run_reports(
     assert rows[1]["download_path"] == ""
 
 
+def test_missing_dates_reach_portal_but_nonempty_dates_are_validated(
+    paths: tuple[Path, Path],
+) -> None:
+    config, input_path = paths
+    input_path.write_text(
+        "transaction_id,start_date,end_date\n"
+        "missing-end,2025-01-01,\n"
+        "missing-start,,2025-01-31\n"
+        "missing-both,,\n"
+        "malformed,2025-02-30,\n"
+        "malformed-end,,2025-02-30\n"
+        "reversed,2025-03-31,2025-03-01\n",
+        encoding="utf-8",
+    )
+    transactions = initialize_batch(str(config))["transactions"]
+    assert [transaction["error"] for transaction in transactions[:3]] == ["", "", ""]
+    assert "start_date must be a valid calendar date" in transactions[3]["error"]
+    assert "end_date must be a valid calendar date" in transactions[4]["error"]
+    assert "on or before" in transactions[5]["error"]
+
+
 def test_same_second_runs_and_statement_paths_are_distinct(
     paths: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch
 ) -> None:

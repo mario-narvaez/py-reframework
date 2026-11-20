@@ -20,9 +20,11 @@ Download One Demo Statement
     END
     Log In To Demo Portal
     Open Banking Page
+    ${applied}=    Apply Demo Date Range    ${request}[start_date]    ${request}[end_date]
+    IF    not ${applied}
+        Fail    Apply Range was disabled because a date was missing.
+    END
     ${path}=    Download Demo Statement
-    ...    ${request}[start_date]
-    ...    ${request}[end_date]
     ...    ${request}[download_path]
     ...    ${request}[download_timeout_seconds]
     Verify Demo Statement    ${path}    ${request}[start_date]    ${request}[end_date]

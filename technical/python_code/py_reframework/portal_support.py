@@ -12,7 +12,7 @@ from .config import load_settings
 from .exceptions import BusinessRuleError, ConfigurationError, SystemFailure
 
 
-def _parse_date(value: str, name: str) -> date:
+def parse_date(value: str, name: str) -> date:
     if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value, flags=re.ASCII):
         raise BusinessRuleError(f"{name} must use YYYY-MM-DD format")
     try:
@@ -22,8 +22,8 @@ def _parse_date(value: str, name: str) -> date:
 
 
 def validate_date_range(start_date: str, end_date: str) -> tuple[str, str]:
-    start = _parse_date(start_date, "start_date")
-    end = _parse_date(end_date, "end_date")
+    start = parse_date(start_date, "start_date")
+    end = parse_date(end_date, "end_date")
     if start > end:
         raise BusinessRuleError("start_date must be on or before end_date")
     return start.isoformat(), end.isoformat()

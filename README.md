@@ -22,9 +22,11 @@ List of date ranges  -->  Practice website  -->  Downloaded statements
                                               + a results report
 ```
 
-For each valid date range in a sample input file, the bot signs in to the
-[practice website](https://hash-chandra.github.io/demowebapp/), enters the
-dates, and downloads a text statement. The
+The bot signs in to the [practice website](https://hash-chandra.github.io/demowebapp/)
+once during initialization. For each eligible row, it enters the dates,
+clicks Apply Range, checks the selected range, downloads a text statement,
+and clears the fields. If a date is missing, the website disables Apply
+Range; the bot records a failure and moves on. The
 **downloaded files are the main output**; a separate results report shows
 which items succeeded or failed.
 

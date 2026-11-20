@@ -7,7 +7,12 @@ from robot.api.deco import keyword
 
 from .config import load_settings
 from .exceptions import BusinessRuleError, ConfigurationError, SystemFailure
-from .portal_support import create_run_directory, reserve_statement_path, validate_date_range
+from .portal_support import (
+    create_run_directory,
+    parse_date,
+    reserve_statement_path,
+    validate_date_range,
+)
 
 _INPUT_COLUMNS = ["transaction_id", "start_date", "end_date"]
 _RESULT_COLUMNS = _INPUT_COLUMNS + ["status", "attempts", "download_path", "error"]
@@ -37,7 +42,12 @@ def _read_transactions(path: Path) -> list[dict[str, str]]:
                 else:
                     seen_ids.add(transaction_id)
                     try:
-                        validate_date_range(start_date, end_date)
+                        if start_date and end_date:
+                            validate_date_range(start_date, end_date)
+                        elif start_date:
+                            parse_date(start_date, "start_date")
+                        elif end_date:
+                            parse_date(end_date, "end_date")
                     except BusinessRuleError as failure:
                         error = str(failure)
                 transactions.append(

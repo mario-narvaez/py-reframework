@@ -85,14 +85,20 @@ to another CSV. The header must match exactly, with one row per transaction:
 transaction_id,start_date,end_date
 period-001,2025-01-01,2025-01-31
 period-002,2025-02-01,2025-02-28
-period-invalid,2025-03-31,2025-03-01
+period-invalid,2025-03-01,
+period-003,2025-04-01,2025-04-30
+period-004,2025-05-01,2025-05-31
+period-005,2025-06-01,2025-06-30
+period-invalid-002,,2025-07-31
 ```
 
 IDs must be nonempty and unique within the input. Dates must be valid
-`YYYY-MM-DD` dates, with the start on or before the end. The final sample row
-deliberately has its start after its end: it demonstrates a business failure
-and makes the batch return a nonzero exit code. Remove or correct it for an
-all-successful run.
+`YYYY-MM-DD` dates, with the start on or before the end. Two sample rows
+deliberately have a missing date: the bot enters the available date, observes
+that the website has disabled Apply Range, and records a business failure.
+The website does not display an error message for this. Remove or correct
+both for an all-successful run. Malformed nonempty dates and reversed ranges
+are rejected before browser interaction.
 
 ## Run a batch
 
@@ -117,6 +123,13 @@ reliability: readiness checks and timeouts still apply. The preset values are
 project choices, not industry standards.
 
 A simple launcher is being considered for the future; it is not implemented.
+
+The batch logs in and opens Banking during initialization. For each eligible
+row, it enters the dates, clicks Apply Range, checks the visible Selected
+range, downloads the statement, and clears both date fields. The demo site's
+Apply Range button has no action of its own, but the bot clicks it as part of
+the workflow. An incomplete range cannot be clicked because the site disables
+the button; the bot clears the fields and continues to the next row.
 
 ### Outputs
 
@@ -156,7 +169,7 @@ The run's `results.csv` is a secondary tracking report:
 | --- | --- |
 | `transaction_id`, `start_date`, `end_date` | The input row. |
 | `status` | `success`, `business_failure`, or `system_failure`. |
-| `attempts` | Processing attempts; invalid rows have zero. |
+| `attempts` | Processing attempts; rows rejected before browser interaction have zero. |
 | `download_path` | Full path for success; empty for a recorded failure. |
 | `error` | Error description for a recorded failure. |
 
@@ -172,15 +185,19 @@ files are unique.
 
 ### Failures, retries, and partial runs
 
-- Invalid IDs or dates are recorded as `business_failure` and are not
-  retried. Processing continues, but the task ultimately returns a nonzero
-  exit code if any row fails.
+- Invalid IDs, malformed dates, and reversed ranges are recorded as
+  `business_failure` before browser interaction. Missing dates are entered
+  on the website and recorded as a business failure when Apply Range is
+  disabled. Business failures are not retried. Processing continues, but the
+  task ultimately returns a nonzero exit code if any row fails.
 - When the initial portal page returns HTTP 502, 503, or 504, the bot closes
   the browser, waits for the configured delay, and retries up to
   `max_retries` times in a fresh browser session. Other errors, including
   browser timeouts, are not automatically assumed to be temporary.
-- When those retries are exhausted, or a downloaded statement fails the
-  existing content check, the bot records `system_failure` and proceeds.
+- If initialization retries are exhausted, the run stops without assigning
+  the failure to a row. If retries are exhausted during later session
+  recovery, or a downloaded statement fails the existing content check, the
+  bot records `system_failure` and proceeds.
   Success resets the consecutive system-failure count; invalid business rows
   leave it unchanged. After three consecutive system failures the run stops.
   This includes content-check failures and does not prove a portal-wide outage.

@@ -27,13 +27,40 @@ PAGE = """<!doctype html>
 <section id="banking" hidden>
   <input data-testid="start-date" type="date">
   <input data-testid="end-date" type="date">
-  <button data-testid="download-statement">Download</button>
+  <button data-testid="apply-date-range" disabled>Apply Range</button>
+  <div data-testid="date-range-display" hidden></div>
+  <button data-testid="download-statement" disabled>Download</button>
 </section>
 <script>
 let loggedIn = false;
 const sidebar = document.querySelector('[data-testid="sidebar"]');
 const login = document.getElementById('login');
 const banking = document.getElementById('banking');
+const startField = document.querySelector('[data-testid="start-date"]');
+const endField = document.querySelector('[data-testid="end-date"]');
+const apply = document.querySelector('[data-testid="apply-date-range"]');
+const display = document.querySelector('[data-testid="date-range-display"]');
+const download = document.querySelector('[data-testid="download-statement"]');
+let needsClear = false;
+let clearedStart = false;
+let clearedEnd = false;
+function updateRange(event) {
+    if (needsClear && event.target.value === '') {
+        if (event.target === startField) clearedStart = true;
+        if (event.target === endField) clearedEnd = true;
+        if (clearedStart && clearedEnd) needsClear = false;
+    }
+    const complete = Boolean(startField.value && endField.value);
+    apply.disabled = !complete;
+    download.disabled = true;
+    display.hidden = !complete;
+    display.textContent = `Selected: ${startField.value} to ${endField.value} (30 days)`;
+}
+startField.addEventListener('input', updateRange);
+endField.addEventListener('input', updateRange);
+apply.onclick = () => {
+    if (!needsClear) download.disabled = false;
+};
 document.querySelector('[data-testid="sidebar-toggle"]').onclick = () => {
     sidebar.hidden = !sidebar.hidden;
 };
@@ -71,6 +98,9 @@ document.querySelector('[data-testid="login-button"]').onclick = () => {
 document.querySelector('[data-testid="download-statement"]').onclick = () => {
     const start = document.querySelector('[data-testid="start-date"]').value;
     const end = document.querySelector('[data-testid="end-date"]').value;
+    needsClear = true;
+    clearedStart = false;
+    clearedEnd = false;
     const content = start === '2025-02-01'
         ? 'invalid statement'
         : `BANK STATEMENT\\nDate Range: ${start} to ${end}\\n`;
@@ -95,7 +125,7 @@ def portal():
             self.server.request_times.append(time.monotonic())
             self.server.cookies.append(self.headers.get("Cookie", ""))
             status = self.server.statuses.pop(0) if self.server.statuses else 200
-            body = PAGE.encode("utf-8")
+            body = self.server.page.encode("utf-8")
             self.send_response(status)
             self.send_header("Set-Cookie", "retry-check=seen; Path=/")
             self.send_header("Content-Type", "text/html; charset=utf-8")
@@ -111,6 +141,7 @@ def portal():
     server.requests = 0
     server.request_times = []
     server.cookies = []
+    server.page = PAGE
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:
@@ -245,6 +276,47 @@ def test_single_statement_uses_dated_run_download_folder(tmp_path: Path, portal)
     assert "Date Range: 2025-01-01 to 2025-01-31" in downloads[0].read_text()
 
 
+def test_missing_dates_reach_disabled_apply_and_batch_continues(tmp_path: Path, portal) -> None:
+    result, rows = run_batch(
+        tmp_path, portal,
+        "first,2025-01-01,2025-01-31\n"
+        "missing-end,2025-03-01,\n"
+        "missing-start,,2025-04-30\n"
+        "last,2025-05-01,2025-05-31\n",
+    )
+    assert result.returncode != 0
+    assert [row["status"] for row in rows] == [
+        "success", "business_failure", "business_failure", "success"
+    ]
+    assert [row["attempts"] for row in rows] == ["1", "1", "1", "1"]
+    assert all("Apply Range was disabled" in row["error"] for row in rows[1:3])
+    assert not any(row["download_path"] for row in rows[1:3])
+    root = ET.parse(tmp_path / "process" / "output" / "reports" / "robot" / "output.xml").getroot()
+    assert len(successful_keywords(root, "Apply Demo Date Range")) == 4
+    assert len(successful_keywords(root, "Download Demo Statement")) == 2
+    assert len(successful_keywords(root, "Clear Demo Dates")) == 4
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        ("apply.disabled = !complete;", "apply.disabled = true;"),
+        ("${startField.value} to ${endField.value}", "${startField.value} to 2024-01-01"),
+    ],
+)
+def test_unexpected_apply_or_selection_failure_stops_as_system_failure(
+    tmp_path: Path, portal, change: tuple[str, str]
+) -> None:
+    portal.page = PAGE.replace(*change)
+    result, rows = run_batch(tmp_path, portal, "one,2025-01-01,2025-01-31\n")
+    assert result.returncode != 0
+    assert [row["status"] for row in rows] == ["system_failure"]
+    assert rows[0]["attempts"] == "1"
+    assert not rows[0]["download_path"]
+    root = ET.parse(tmp_path / "process" / "output" / "reports" / "robot" / "output.xml").getroot()
+    assert not successful_keywords(root, "Download Demo Statement")
+
+
 @pytest.mark.parametrize("task", ["batch", "single"])
 def test_tasks_default_to_visible_browser(tmp_path: Path, portal, task: str) -> None:
     command, env = prepare_batch(tmp_path, portal, "one,2025-01-01,2025-01-31\n")
@@ -295,7 +367,7 @@ def test_temporary_http_failure_retries_in_a_new_browser_session(
     result, rows = run_batch(tmp_path, portal, "one,2025-01-01,2025-01-31\n", delay=delay)
     assert result.returncode == 0, result.stdout + result.stderr
     assert rows[0]["status"] == "success"
-    assert rows[0]["attempts"] == "2"
+    assert rows[0]["attempts"] == "1"
     assert portal.requests == 2
     assert portal.request_times[1] - portal.request_times[0] >= delay
     assert portal.cookies == ["", ""]
@@ -315,7 +387,7 @@ def test_temporary_http_failure_retries_in_a_new_browser_session(
     assert successful_keywords(root, "Close Browser")[0].findtext("arg") == "ALL"
 
 
-def test_zero_retries_records_temporary_failure_and_continues(tmp_path: Path, portal) -> None:
+def test_zero_retries_stops_initialization_without_assigning_a_row(tmp_path: Path, portal) -> None:
     portal.statuses = [503, 200]
     result, rows = run_batch(
         tmp_path, portal,
@@ -323,16 +395,25 @@ def test_zero_retries_records_temporary_failure_and_continues(tmp_path: Path, po
         retries=0,
     )
     assert result.returncode != 0
-    assert [row["status"] for row in rows] == ["system_failure", "success"]
-    assert [row["attempts"] for row in rows] == ["1", "1"]
+    assert rows == []
+    assert portal.requests == 1
+    assert "Initialization failed" in result.stdout
+
+
+def test_exhausted_initialization_retries_leave_rows_unprocessed(tmp_path: Path, portal) -> None:
+    portal.statuses = [503, 503, 200]
+    result, rows = run_batch(tmp_path, portal, "one,2025-01-01,2025-01-31\n")
+    assert result.returncode != 0
+    assert rows == []
     assert portal.requests == 2
+    assert "Initialization failed" in result.stdout
 
 
 def test_three_consecutive_system_failures_stop_the_batch(tmp_path: Path, portal) -> None:
-    portal.statuses = [503] * 6
+    portal.statuses = [200] + [503] * 4
     result, rows = run_batch(
         tmp_path, portal,
-        "one,2025-01-01,2025-01-31\n"
+        "one,2025-02-01,2025-02-28\n"
         "invalid,2025-02-30,2025-03-01\n"
         "two,2025-01-01,2025-01-31\n"
         "three,2025-01-01,2025-01-31\n"
@@ -342,17 +423,17 @@ def test_three_consecutive_system_failures_stop_the_batch(tmp_path: Path, portal
     assert [row["status"] for row in rows] == [
         "system_failure", "business_failure", "system_failure", "system_failure"
     ]
-    assert [row["attempts"] for row in rows] == ["2", "0", "2", "2"]
-    assert portal.requests == 6
+    assert [row["attempts"] for row in rows] == ["1", "0", "2", "2"]
+    assert portal.requests == 5
     assert "Stopped after 3 consecutive system failures" in result.stdout
     assert "0 succeeded, 1 business failures, 3 system failures" in result.stdout
 
 
 def test_success_resets_the_system_failure_streak(tmp_path: Path, portal) -> None:
-    portal.statuses = [503, 503, 200, 503, 503, 503, 503]
+    portal.statuses = [200, 200, 503, 503, 503, 503]
     result, rows = run_batch(
         tmp_path, portal,
-        "first,2025-01-01,2025-01-31\n"
+        "first,2025-02-01,2025-02-28\n"
         "success,2025-03-01,2025-03-31\n"
         "broken,2025-02-01,2025-02-28\n"
         "fourth,2025-01-01,2025-01-31\n"
@@ -384,8 +465,7 @@ def test_permanent_failures_stop_without_retry(
         username=username, password=password,
     )
     assert result.returncode != 0
-    assert [row["status"] for row in rows] == ["system_failure"]
-    assert rows[0]["attempts"] == "1"
+    assert rows == []
     assert portal.requests == 1
     assert "retrying" not in result.stdout
     output = (
@@ -404,8 +484,7 @@ def test_missing_credentials_stop_without_opening_a_browser(tmp_path: Path, port
         tmp_path, portal, "one,2025-01-01,2025-01-31\n", username=""
     )
     assert result.returncode != 0
-    assert rows[0]["status"] == "system_failure"
-    assert rows[0]["attempts"] == "1"
+    assert rows == []
     assert portal.requests == 0
     assert "retrying" not in result.stdout
 

@@ -24,6 +24,7 @@ Process Statement Transactions
     Set Test Variable    ${RUN_STATE}    ${state}
     ${batch}=    Initialize Batch    ${CONFIG_FILE}
     Log    Results CSV: ${batch}[results_path]    console=${True}
+    Initialize Portal Session    ${batch}    ${state}
     FOR    ${transaction}    IN    @{batch}[transactions]
         Process Transaction With Recovery    ${batch}    ${transaction}    ${state}
         Stop If Too Many System Failures    ${state}
@@ -79,10 +80,16 @@ Process Statement Attempt
         ...    error=Portal returned temporary HTTP ${temporary_status}; retries exhausted.
         RETURN    ${result}
     END
+    ${applied}=    Apply Demo Date Range    ${transaction}[start_date]    ${transaction}[end_date]
+    IF    not ${applied}
+        ${result}=    Create Dictionary
+        ...    status=business_failure
+        ...    download_path=${EMPTY}
+        ...    error=Apply Range was disabled because a date was missing.
+        RETURN    ${result}
+    END
     ${download_path}=    Reserve Batch Statement Path    ${batch}
     ${path}=    Download Demo Statement
-    ...    ${transaction}[start_date]
-    ...    ${transaction}[end_date]
     ...    ${download_path}
     ...    ${batch}[download_timeout_seconds]
     ${valid}=    Check Demo Statement    ${path}    ${transaction}[start_date]    ${transaction}[end_date]
@@ -98,6 +105,21 @@ Process Statement Attempt
     END
     ${result}=    Create Dictionary    status=success    download_path=${path}    error=${EMPTY}
     RETURN    ${result}
+
+Initialize Portal Session
+    [Arguments]    ${batch}    ${state}
+    ${maximum_attempts}=    Evaluate    $batch["max_retries"] + 1
+    FOR    ${index}    IN RANGE    ${maximum_attempts}
+        ${temporary_status}=    Ensure Portal Session    ${batch}    ${state}
+        IF    $temporary_status is None
+            RETURN
+        END
+        IF    ${index} + 1 < ${maximum_attempts}
+            Log    Portal returned HTTP ${temporary_status}; retrying after ${batch}[retry_delay_seconds] seconds.    console=${True}
+            Sleep    ${batch}[retry_delay_seconds] seconds
+        END
+    END
+    Fail    Initialization failed: portal returned temporary HTTP ${temporary_status}; retries exhausted.
 
 Ensure Portal Session
     [Arguments]    ${batch}    ${state}
@@ -126,6 +148,9 @@ Record Transaction Outcome
     IF    $result["status"] == "success"
         ${count}=    Evaluate    $state["successes"] + 1
         Set To Dictionary    ${state}    successes=${count}    consecutive_failures=${0}
+    ELSE IF    $result["status"] == "business_failure"
+        ${count}=    Evaluate    $state["business_failures"] + 1
+        Set To Dictionary    ${state}    business_failures=${count}
     ELSE
         ${count}=    Evaluate    $state["system_failures"] + 1
         ${consecutive}=    Evaluate    $state["consecutive_failures"] + 1
