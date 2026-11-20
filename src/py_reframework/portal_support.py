@@ -21,29 +21,40 @@ def _parse_date(value: str, name: str) -> date:
         raise BusinessRuleError(f"{name} must be a valid calendar date") from error
 
 
-@keyword
-def prepare_statement_request(config_path: str, start_date: str, end_date: str) -> dict:
-    """Validate the request and reserve a unique folder for its download."""
-    settings = load_settings(config_path)
+def validate_date_range(start_date: str, end_date: str) -> tuple[str, str]:
     start = _parse_date(start_date, "start_date")
     end = _parse_date(end_date, "end_date")
     if start > end:
         raise BusinessRuleError("start_date must be on or before end_date")
+    return start.isoformat(), end.isoformat()
+
+
+def validate_portal_credentials() -> None:
     for name in ("PORTAL_USERNAME", "PORTAL_PASSWORD"):
         if not os.environ.get(name, "").strip():
             raise ConfigurationError(f"Environment variable {name} must be set")
 
-    try:
-        settings.output_dir.mkdir(parents=True, exist_ok=True)
-        run_dir = Path(tempfile.mkdtemp(prefix="statement-", dir=settings.output_dir))
-    except OSError as error:
-        raise SystemFailure(f"Cannot create download directory: {settings.output_dir}") from error
 
+def reserve_statement_path(output_dir: Path) -> str:
+    try:
+        output_dir.mkdir(parents=True, exist_ok=True)
+        run_dir = Path(tempfile.mkdtemp(prefix="statement-", dir=output_dir))
+    except OSError as error:
+        raise SystemFailure(f"Cannot create download directory: {output_dir}") from error
+    return str(run_dir / "statement.txt")
+
+
+@keyword
+def prepare_statement_request(config_path: str, start_date: str, end_date: str) -> dict:
+    """Validate the request and reserve a unique folder for its download."""
+    settings = load_settings(config_path)
+    start, end = validate_date_range(start_date, end_date)
+    validate_portal_credentials()
     return {
         "portal_url": settings.portal_url,
-        "start_date": start.isoformat(),
-        "end_date": end.isoformat(),
-        "download_path": str(run_dir / "statement.txt"),
+        "start_date": start,
+        "end_date": end,
+        "download_path": reserve_statement_path(settings.output_dir),
         "download_timeout_seconds": settings.download_timeout_seconds,
     }
 

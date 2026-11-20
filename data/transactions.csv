@@ -1,0 +1,4 @@
+transaction_id,start_date,end_date
+period-001,2025-01-01,2025-01-31
+period-002,2025-02-01,2025-02-28
+period-invalid,2025-03-31,2025-03-01
