@@ -1,81 +1,162 @@
 # py-reframework
 
-This project is a **practice automation**, inspired by UiPath's Robotic
-Enterprise Framework (REFramework). It demonstrates a repeatable pattern:
-take a list of items, process each one, and record what happened.
+**A readable RPA proof of concept inspired by UiPath's Robotic Enterprise
+Framework (REFramework).** It takes a list of date ranges, uses a practice
+website to download a statement for each eligible range, and records the
+outcome of each processed item.
 
-It combines three tools: **Robot Framework** organizes the steps and creates
-execution reports; **Browser Library** opens and operates the website; and
-**Python** reads the input list and settings, checks the dates and downloaded
-files, and writes the results report. The input and results use CSV files,
-which are simple text-based tables.
+The purpose is to show how a structured automation can be **modular, easier
+to understand, and more resilient**: shared lifecycle and error-handling
+ideas are separated from the actions specific to the website.
 
-The goal is to make that pattern understandable to business teams and useful
-as a starting point for future automations, with a developer adapting and
-testing it for each new process. The pattern aims to reduce repetitive work
-and make outcomes easier to review.
+The same pattern could serve as a template for other processes: use an
+invoice number to find and download an invoice, a purchase order (PO) number
+to check an order, a deduction or claim ID to collect details for review, or
+a shipment tracking number to check delivery status. In each case, the bot
+would process a list of items, produce the required output, and report what
+happened.
 
-## What the demo does
+These are **potential adaptations, not existing features**. Each would need
+its own application access, business rules, actions, and tests; changing
+the input alone is not enough.
 
-```text
-List of date ranges  -->  Practice website  -->  Downloaded statements
-                                              + a results report
+> This is not UiPath REFramework or a production-ready platform. The
+> downloaded statements contain dates and placeholder text, **not real
+> banking transactions or structured business records**.
+
+## See it in action
+
+[Watch the three-minute walkthrough](docs/demo-evidence/py-reframework-walkthrough.mp4):
+sample input, bot execution, downloaded statements, and the results CSV.
+The sample includes two deliberately incomplete date ranges, which produce
+expected business failures.
+
+## The process at a glance
+
+In this project, a **transaction** means one row in the
+[input CSV](process/input/transactions.csv): an ID, a start date, and an end
+date. It does **not** mean a financial transaction. A **batch** is the list
+of rows processed in one run.
+
+```mermaid
+flowchart TD
+    A["Initialize<br/>Load settings and input; prepare the run<br/>Open the portal and log in"]
+    B{"Another row?"}
+    C["Get transaction data<br/>Take the next CSV row"]
+    D["Process transaction<br/>Check the row; for an eligible range,<br/>download and check a statement"]
+    E["Handle the outcome<br/>Retry selected temporary errors when applicable<br/>Record success or failure when possible"]
+    F{"Continue the batch?"}
+    G["End process<br/>Summarize outcomes and close the browser"]
+
+    A --> B
+    A -->|"Initialization fails"| G
+    B -->|"Yes"| C
+    C --> D
+    D --> E
+    E --> F
+    F -->|"Yes"| B
+    F -->|"Stop"| G
+    B -->|"No"| G
 ```
 
-The bot signs in to the [practice website](https://hash-chandra.github.io/demowebapp/)
-once during initialization. For each eligible row, it enters the dates,
-clicks Apply Range, checks the selected range, downloads a text statement,
-and clears the fields. If a date is missing, the website disables Apply
-Range; the bot records a failure and moves on. The
-**downloaded files are the main output**; a separate results report shows
-which items succeeded or failed.
+The diagram shows the main path, not every failure branch. In particular,
+some failures can stop a run before a transaction result can be recorded.
 
-By default, the bot shows its browser so you can watch it work. It can also
-run without showing the browser window, known as **headless mode**: it still
-visits the website and downloads files. See
-[setup and operation](docs/technical/setup-and-operation.md).
+### What each stage does
 
-If an input is invalid, the bot records the problem and moves on. It retries
-some specific temporary website errors, but stops for certain serious
-technical problems or after three technical failures without an intervening
-success. See [setup and operation](docs/technical/setup-and-operation.md)
-for the exact rules.
+1. **Initialize** prepares the run once: it loads and validates the settings
+   and input, creates a run folder and results report, opens the browser,
+   signs in, and navigates to Banking.
+2. **Get transaction data** selects the next row from the already-loaded CSV.
+   There is no external queue or saved position for resuming a batch.
+3. **Process transaction** checks the row's validation result and performs
+   the work for that row. For an eligible range, the bot enters the dates,
+   clicks Apply Range, checks the selected range, downloads a text statement,
+   clears the fields, and checks the downloaded content.
+4. **Handle the outcome** records success, a business failure, or a system
+   failure when possible. The bot continues, retries an identified temporary
+   error, or stops, depending on the problem. Error handling happens
+   throughout the lifecycle, not only after processing.
+5. **End process** reports the recorded counts and closes the browser when
+   open. A batch with recorded failures ends with a nonzero exit code.
 
-## What this demo is and is not
+The downloaded statements are the **primary output**. The separate results
+CSV tracks recorded outcomes, attempts, file paths, and errors; Robot's
+execution reports provide details about the run.
 
-- The website is a public practice site. Its sign-in is simulated, and its
-  Banking page does not actually require sign-in.
-- The downloaded statement contains the selected dates and placeholder
-  text, **not real banking transactions or structured business records**.
-- The bot does not yet process invoices, purchase orders, employee records,
-  or other real business data. Those are possible future adaptations.
-- It cannot resume an interrupted batch automatically. Rerunning can
-  download an item again, even if an earlier run succeeded.
-- The bot is started from PowerShell. A simple launcher is being considered
-  as a future improvement, but it has not been implemented.
+## How the modules work together
 
-Use only the site's public demo credentials and fictional sample data. Do
-not enter real passwords or personal information on the practice site.
+The lifecycle is project code written as Robot tasks and keywords; it is not
+automatically supplied by Robot Framework. The pieces have distinct roles:
 
-## Where this pattern could help
+```mermaid
+flowchart LR
+    Input["Input CSV<br/>date ranges"] --> Python["Python libraries<br/>settings, validation,<br/>file checks, results"]
+    Settings["Settings CSV"] --> Python
+    Credentials["Credentials<br/>environment variables"] -->|"Presence check"| Python
+    Credentials -->|"Secret input"| Portal
+    Robot["Robot batch task<br/>lifecycle, loop,<br/>recovery decisions"] -->|"Calls"| Python
+    Python -->|"Data and validation results"| Robot
+    Robot -->|"Calls"| Portal["Robot portal resource<br/>site actions and selectors"]
+    Portal --> Browser["Browser Library<br/>controls Chromium"]
+    Browser --> Site["Practice website"]
+    Site --> Statements["Downloaded statements<br/>primary output"]
+    Statements -->|"Content check"| Python
+    Python --> Results["Results CSV<br/>transaction outcomes"]
+    Robot --> Reports["Robot reports<br/>execution details"]
+```
 
-Instead of dates, an item might be an invoice number, purchase order number,
-shipment tracking number, or support case ID. An operations team might use a
-similar pattern to review a list of requests, with appropriate privacy controls.
+| Part | Responsibility |
+| --- | --- |
+| **Robot Framework** and the [batch task](technical/robot/tasks/process_transactions.robot) | Run readable keywords that coordinate initialization, the transaction loop, recovery decisions, and cleanup. Robot also generates execution reports. |
+| **Portal resource** | Keeps the demo site's navigation, selectors, and browser actions in [one place](technical/robot/resources/demo_portal.resource), separate from transaction logic. |
+| **Browser Library** | Controls Chromium through Playwright so the bot can interact with the website and download files. |
+| **Python libraries** | Load and validate settings and CSV rows, check downloaded content, and write results. They return data and error information to the Robot task. |
+| **CSV files** | Supply the input and non-secret settings, and store the results. Credentials are supplied separately through environment variables. |
 
-These are **examples, not existing features**. A new process needs its own
-requirements, permitted access, validation, portal actions, and tests; changing
-a field name alone is not enough.
+This separation makes it easier to follow and adapt the pattern, but a new
+process still needs its own requirements, actions, validation, and tests.
 
-## Explore the project
+## Handling failures
 
-| Reader | Guide | What it explains |
-| --- | --- | --- |
-| Business and operations teams | [Business use cases](docs/general/use-cases.md) | Examples, outputs, and human decisions. |
-| Developers and technical reviewers | [Architecture](docs/technical/architecture.md) | The lifecycle, components, file map, and current limits. |
-| Operators and developers | [Setup and operation](docs/technical/setup-and-operation.md) | Installation, sample input, commands, results, and troubleshooting. |
-| Developers adapting the bot | [Adaptation guide](docs/technical/adaptation-guide.md) | How an invoice or purchase order solution could differ. |
+- **Business failures** mean a row does not meet a rule. For example, a
+  missing date leaves Apply Range disabled. The bot records the failure
+  without retrying it and continues to the next row.
+- **System failures** are technical problems. The bot retries only HTTP
+  502, 503, and 504 responses when opening the initial portal page, using
+  bounded attempts and delays. This can occur during initialization or
+  session recovery. Other unexpected errors are not automatically retried.
+- The batch stops on a non-recoverable error or after three consecutive
+  recorded system failures without an intervening success. Failure
+  screenshots are attempted when a browser is available, but are not
+  guaranteed.
 
-This repository is a proof of concept, not a production-ready automation
-platform. A person should review the process, permissions, security, and test
-results before using an adaptation with real data.
+Initialization, input, or results-write failures can stop the run and leave
+a partial report or no transaction result for the failure. See
+[setup and operation](docs/technical/setup-and-operation.md) for the exact
+retry, stop, and partial-run rules.
+
+## Scope and safeguards
+
+- The [practice website](https://hash-chandra.github.io/demowebapp/) uses
+  simulated sign-in; its Banking page does not actually require login.
+- Use only the site's public demo credentials and fictional sample data.
+  Do not enter real passwords or personal information.
+- Treat reports, screenshots, and downloaded files as potentially
+  sensitive; the results CSV includes full local download paths.
+- An interrupted batch cannot resume automatically. Rerunning can download
+  an item again, even if an earlier run succeeded.
+- The bot starts from PowerShell and shows the browser by default. It also
+  supports headless mode; a simple launcher is not implemented.
+
+## Getting started and exploring further
+
+| I want to... | Start here |
+| --- | --- |
+| Install, run, and inspect the demo | [Setup and operation](docs/technical/setup-and-operation.md) |
+| Understand the components and failure boundaries | [Architecture](docs/technical/architecture.md) |
+| Explore possible business applications | [Business use cases](docs/general/use-cases.md) |
+| Consider adapting the pattern to another process | [Adaptation guide](docs/technical/adaptation-guide.md) |
+
+Before using an adaptation with real data, people must review its
+requirements, permissions, security, and test results.
