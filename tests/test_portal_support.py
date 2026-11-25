@@ -6,7 +6,11 @@ from pathlib import Path
 import pytest
 
 from py_reframework.exceptions import BusinessRuleError, ConfigurationError, SystemFailure
-from py_reframework.portal_support import prepare_statement_request, verify_demo_statement
+from py_reframework.portal_support import (
+    load_portal_credentials,
+    prepare_statement_request,
+    verify_demo_statement,
+)
 
 
 @pytest.fixture
@@ -15,6 +19,8 @@ def config_path(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     path.write_text(
         "setting,value\n"
         "portal_url,https://example.com/\n"
+        "portal_username,\n"
+        "portal_password,\n"
         "input_csv,input.csv\n"
         "output_dir,output\n"
         "max_retries,2\n"
@@ -67,6 +73,52 @@ def test_missing_credentials_fail_before_creating_output(
     assert not (config_path.parent / "output").exists()
 
 
+def set_config_credentials(config_path: Path, username: str, password: str) -> None:
+    content = config_path.read_text(encoding="utf-8")
+    content = content.replace("portal_username,\n", f"portal_username,{username}\n")
+    content = content.replace("portal_password,\n", f"portal_password,{password}\n")
+    config_path.write_text(content, encoding="utf-8")
+
+
+def test_credentials_come_from_the_settings_when_the_environment_has_none(
+    config_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("PORTAL_USERNAME")
+    monkeypatch.delenv("PORTAL_PASSWORD")
+    set_config_credentials(config_path, "csv-user", "csv-password")
+    prepare_statement_request(str(config_path), "2025-01-01", "2025-01-31")
+    assert os.environ["PORTAL_USERNAME"] == "csv-user"
+    assert os.environ["PORTAL_PASSWORD"] == "csv-password"
+
+
+def test_a_complete_environment_pair_takes_precedence(config_path: Path) -> None:
+    set_config_credentials(config_path, "csv-user", "csv-password")
+    load_portal_credentials(str(config_path))
+    assert os.environ["PORTAL_USERNAME"] == "demo-user"
+    assert os.environ["PORTAL_PASSWORD"] == "demo-password"
+
+
+def test_an_incomplete_environment_pair_is_not_completed_from_the_settings(
+    config_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    set_config_credentials(config_path, "csv-user", "csv-password")
+    monkeypatch.setenv("PORTAL_USERNAME", "   ")
+    with pytest.raises(ConfigurationError, match="PORTAL_USERNAME is missing"):
+        load_portal_credentials(str(config_path))
+
+
+def test_credentials_missing_everywhere_fail_before_creating_output(
+    config_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("PORTAL_USERNAME")
+    monkeypatch.delenv("PORTAL_PASSWORD")
+    set_config_credentials(config_path, "csv-user", "")
+    with pytest.raises(ConfigurationError, match="credentials are missing") as failure:
+        prepare_statement_request(str(config_path), "2025-01-01", "2025-01-31")
+    assert "csv-user" not in str(failure.value)
+    assert not (config_path.parent / "output").exists()
+
+
 def test_verify_statement_content_and_wrong_dates(tmp_path: Path) -> None:
     path = tmp_path / "statement.txt"
     path.write_text(
@@ -89,9 +141,9 @@ def test_missing_statement_is_a_system_failure(tmp_path: Path) -> None:
 
 
 def test_robot_stops_before_browser_for_invalid_date(config_path: Path) -> None:
-    root = Path(__file__).resolve().parents[2]
+    root = Path(__file__).resolve().parents[1]
     env = os.environ.copy()
-    env["PYTHONPATH"] = str(root / "technical" / "python_code")
+    env["PYTHONPATH"] = str(root / "code" / "python")
     result = subprocess.run(
         [
             sys.executable,
@@ -109,7 +161,7 @@ def test_robot_stops_before_browser_for_invalid_date(config_path: Path) -> None:
             "START_DATE:2025-02-30",
             "--variable",
             "END_DATE:2025-03-01",
-            str(root / "technical" / "robot" / "tasks" / "download_statement.robot"),
+            str(root / "code" / "robot" / "tasks" / "download_statement.robot"),
         ],
         cwd=root,
         env=env,
@@ -124,8 +176,8 @@ def test_robot_stops_before_browser_for_invalid_date(config_path: Path) -> None:
 
 
 def test_robot_applies_demo_pacing_only_to_visible_browsers(tmp_path: Path) -> None:
-    root = Path(__file__).resolve().parents[2]
-    resource = root / "technical" / "robot" / "resources" / "demo_portal.resource"
+    root = Path(__file__).resolve().parents[1]
+    resource = root / "code" / "robot" / "resources" / "demo_portal.resource"
     resource_path = str(resource).replace("\\", "${/}")
     suite = tmp_path / "pacing.robot"
     suite.write_text(

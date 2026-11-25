@@ -8,8 +8,10 @@ from pathlib import Path
 
 from robot.api.deco import keyword
 
-from .config import load_settings
+from .config import Settings, load_settings
 from .exceptions import BusinessRuleError, ConfigurationError, SystemFailure
+
+_CREDENTIAL_VARIABLES = ("PORTAL_USERNAME", "PORTAL_PASSWORD")
 
 
 def parse_date(value: str, name: str) -> date:
@@ -29,10 +31,37 @@ def validate_date_range(start_date: str, end_date: str) -> tuple[str, str]:
     return start.isoformat(), end.isoformat()
 
 
-def validate_portal_credentials() -> None:
-    for name in ("PORTAL_USERNAME", "PORTAL_PASSWORD"):
-        if not os.environ.get(name, "").strip():
-            raise ConfigurationError(f"Environment variable {name} must be set")
+def _resolve_portal_credentials(settings: Settings) -> tuple[str, str]:
+    """Prefer a complete environment pair, otherwise use the settings CSV."""
+    supplied = {name: os.environ.get(name, "").strip() for name in _CREDENTIAL_VARIABLES}
+    missing = [name for name, value in supplied.items() if not value]
+    if not missing:
+        return supplied["PORTAL_USERNAME"], supplied["PORTAL_PASSWORD"]
+    if len(missing) == 1:
+        raise ConfigurationError(
+            "Environment variables PORTAL_USERNAME and PORTAL_PASSWORD must be set "
+            f"together; {missing[0]} is missing or empty"
+        )
+    if settings.portal_username and settings.portal_password:
+        return settings.portal_username, settings.portal_password
+    raise ConfigurationError(
+        "Portal credentials are missing: fill portal_username and portal_password "
+        "in the settings CSV, or set both PORTAL_USERNAME and PORTAL_PASSWORD"
+    )
+
+
+def _publish_portal_credentials(settings: Settings) -> None:
+    # The portal resource reads the credentials from the environment, which keeps
+    # them out of Robot variables and logged keyword arguments.
+    username, password = _resolve_portal_credentials(settings)
+    os.environ["PORTAL_USERNAME"] = username
+    os.environ["PORTAL_PASSWORD"] = password
+
+
+@keyword
+def load_portal_credentials(config_path: str) -> None:
+    """Make the portal credentials available to the login keyword."""
+    _publish_portal_credentials(load_settings(config_path))
 
 
 def create_run_directory(output_dir: Path) -> Path:
@@ -68,7 +97,7 @@ def prepare_statement_request(config_path: str, start_date: str, end_date: str) 
     """Validate the request and reserve a unique folder for its download."""
     settings = load_settings(config_path)
     start, end = validate_date_range(start_date, end_date)
-    validate_portal_credentials()
+    _publish_portal_credentials(settings)
     run_dir = create_run_directory(settings.output_dir)
     return {
         "portal_url": settings.portal_url,

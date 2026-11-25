@@ -1,6 +1,6 @@
 # Setup and operation
 
-[Project overview](../../README.md) | [Architecture](architecture.md) |
+[Project overview](../README.md) | [Architecture](architecture.md) |
 [Adaptation guide](adaptation-guide.md)
 
 This guide is for operators and developers. Commands assume PowerShell on
@@ -36,22 +36,20 @@ Verify the tools:
 .\.venv\Scripts\python.exe -m pip check
 ```
 
-[.env.example](../../.env.example) lists placeholder credential names. The
-project does not load `.env` files; the commands below set environment
-variables in the current PowerShell session.
-
 ## Configuration
 
-[technical/config/settings.csv](../../technical/config/settings.csv) uses `setting,value`
-columns. It supplies the portal URL, input CSV path, output directory,
-maximum retries, retry delay, download timeout, and visible-demo pacing.
-Paths are resolved relative to the settings file's directory.
+`process/config.csv` uses `setting,value` columns. It supplies the portal URL
+and login, input CSV path, output directory, maximum retries, retry delay,
+download timeout, and visible-demo pacing. Paths are resolved relative to the
+settings file's directory, so the sample values below point into `process/`.
 
 | Setting | Meaning | Valid range / sample value |
 | --- | --- | --- |
 | `portal_url` | Initial portal page. | HTTP(S) URL without credentials or a fragment. |
-| `input_csv` | Transaction input file. | `../../process/input/transactions.csv` |
-| `output_dir` | Parent directory for run folders. | `../../process/output/runs` |
+| `portal_username` | Portal login name. | Sample: `admin`, the practice site's public value. |
+| `portal_password` | Portal password. | Sample: `admin123`, the practice site's public value. |
+| `input_csv` | Transaction input file. | `input/transactions.csv` |
+| `output_dir` | Parent directory for run folders. | `output/runs` |
 | `max_retries` | Additional attempts after the first. | 0-10; sample: 1. |
 | `retry_delay_seconds` | Wait before a retry. | 0-300 seconds; sample: 5. |
 | `download_timeout_seconds` | Download wait limit. | 1-300 seconds; sample: 30. |
@@ -65,20 +63,37 @@ integer ranges. It resolves paths but does not check input existence or create
 directories. Batch initialization reads and validates the input, then creates
 the output directory and report. Retry settings apply only to the batch's
 identified temporary errors described below. Demo delays must be ordered
-short <= medium <= long. Existing custom settings files must include the demo
-settings too.
+short <= medium <= long. Every setting row must be present; custom settings
+files from an earlier version need the credential and demo rows too.
+
+### Portal credentials
+
+The bot reads the portal login from `portal_username` and `portal_password`
+in the tracked `process/config.csv`, so an operator updates one file when the
+website or login changes and does not type credentials into the terminal. The
+values in the repository are the practice site's public demo credentials. A
+bot for a real portal should not commit real credentials: keep them out of
+version control, or supply them through the environment as described next.
+
+An execution platform or secret manager can supply the login instead by
+setting both `PORTAL_USERNAME` and `PORTAL_PASSWORD` before the run. A complete
+pair from the environment takes precedence over the file. If only one of the
+two is set, or neither is set and the file lacks a username or password, the
+run stops before opening a browser with an error that names what is missing.
+The error never contains the password, and Browser Library's secret-input
+keyword keeps the password out of the Robot log.
 
 Python callers can import `load_settings` from `py_reframework.config` and
 use the returned `Settings` object. For Python commands outside pytest, make
 the source directory importable in the current session:
 
 ```powershell
-$env:PYTHONPATH = (Join-Path (Get-Location) 'technical\python_code')
+$env:PYTHONPATH = (Join-Path (Get-Location) 'code\python')
 ```
 
 ## Prepare input
 
-Edit [process/input/transactions.csv](../../process/input/transactions.csv), or set `input_csv`
+Edit [process/input/transactions.csv](../process/input/transactions.csv), or set `input_csv`
 to another CSV. The header must match exactly, with one row per transaction:
 
 ```csv
@@ -103,15 +118,14 @@ are rejected before browser interaction.
 ## Run a batch
 
 ```powershell
-$env:PYTHONPATH = (Join-Path (Get-Location) 'technical\python_code')
+$env:PYTHONPATH = (Join-Path (Get-Location) 'code\python')
 $env:PLAYWRIGHT_BROWSERS_PATH = (Join-Path (Get-Location) '.venv\ms-playwright')
-$env:PORTAL_USERNAME = 'admin'
-$env:PORTAL_PASSWORD = 'admin123'
 .\.venv\Scripts\python.exe -m robot --outputdir process\output\reports\robot `
-    technical\robot\tasks\process_transactions.robot
+    code\robot\tasks\process_transactions.robot
 ```
 
-The credentials above are the practice site's public values. By default, the
+The portal login comes from `process/config.csv`; see
+[Portal credentials](#portal-credentials). By default, the
 browser is visible so you can watch it work. To hide the browser window, add
 `--variable HEADLESS:True` before the task path. In this headless mode, the
 browser still operates the website, downloads statements, and records results.
@@ -224,16 +238,14 @@ and screenshots still require care.
 
 ## Run one statement
 
-After setup, use the public demo credentials:
+After setup, the single-statement task uses the same settings and login:
 
 ```powershell
-$env:PYTHONPATH = (Join-Path (Get-Location) 'technical\python_code')
+$env:PYTHONPATH = (Join-Path (Get-Location) 'code\python')
 $env:PLAYWRIGHT_BROWSERS_PATH = (Join-Path (Get-Location) '.venv\ms-playwright')
-$env:PORTAL_USERNAME = 'admin'
-$env:PORTAL_PASSWORD = 'admin123'
 .\.venv\Scripts\python.exe -m robot --outputdir process\output\reports\robot `
     --variable START_DATE:2025-01-01 --variable END_DATE:2025-01-31 `
-    technical\robot\tasks\download_statement.robot
+    code\robot\tasks\download_statement.robot
 ```
 
 Replace the dates with a valid `YYYY-MM-DD` range. The browser is visible by
@@ -259,5 +271,5 @@ Run the local selector checks separately:
 
 ```powershell
 $env:PLAYWRIGHT_BROWSERS_PATH = (Join-Path (Get-Location) '.venv\ms-playwright')
-.\.venv\Scripts\python.exe -m robot --outputdir process\output\reports\selector-tests technical\tests\robot\selector_contract.robot
+.\.venv\Scripts\python.exe -m robot --outputdir process\output\reports\selector-tests tests\robot\selector_contract.robot
 ```

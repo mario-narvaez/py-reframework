@@ -92,9 +92,8 @@ automatically supplied by Robot Framework. The pieces have distinct roles:
 ```mermaid
 flowchart LR
     Input["Input CSV<br/>date ranges"] --> Python["Python libraries<br/>settings, validation,<br/>file checks, results"]
-    Settings["Settings CSV"] --> Python
-    Credentials["Credentials<br/>environment variables"] -->|"Presence check"| Python
-    Credentials -->|"Secret input"| Portal
+    Settings["Settings CSV<br/>options and portal credentials"] --> Python
+    Python -->|"Secret input"| Portal
     Robot["Robot batch task<br/>lifecycle, loop,<br/>recovery decisions"] -->|"Calls"| Python
     Python -->|"Data and validation results"| Robot
     Robot -->|"Calls"| Portal["Robot portal resource<br/>site actions and selectors"]
@@ -108,11 +107,11 @@ flowchart LR
 
 | Part | Responsibility |
 | --- | --- |
-| **Robot Framework** and the [batch task](technical/robot/tasks/process_transactions.robot) | Run readable keywords that coordinate initialization, the transaction loop, recovery decisions, and cleanup. Robot also generates execution reports. |
-| **Portal resource** | Keeps the demo site's navigation, selectors, and browser actions in [one place](technical/robot/resources/demo_portal.resource), separate from transaction logic. |
+| **Robot Framework** and the [batch task](code/robot/tasks/process_transactions.robot) | Run readable keywords that coordinate initialization, the transaction loop, recovery decisions, and cleanup. Robot also generates execution reports. |
+| **Portal resource** | Keeps the demo site's navigation, selectors, and browser actions in [one place](code/robot/resources/demo_portal.resource), separate from transaction logic. |
 | **Browser Library** | Controls Chromium through Playwright so the bot can interact with the website and download files. |
 | **Python libraries** | Load and validate settings and CSV rows, check downloaded content, and write results. They return data and error information to the Robot task. |
-| **CSV files** | Supply the input and non-secret settings, and store the results. Credentials are supplied separately through environment variables. |
+| **CSV files** | Supply the input, the operator's settings (including portal credentials), and store the results. An execution platform can supply credentials through environment variables instead. |
 
 This separation makes it easier to follow and adapt the pattern, but a new
 process still needs its own requirements, actions, validation, and tests.
@@ -133,7 +132,7 @@ process still needs its own requirements, actions, validation, and tests.
 
 Initialization, input, or results-write failures can stop the run and leave
 a partial report or no transaction result for the failure. See
-[setup and operation](docs/technical/setup-and-operation.md) for the exact
+[setup and operation](docs/setup-and-operation.md) for the exact
 retry, stop, and partial-run rules.
 
 ## Scope and safeguards
@@ -142,6 +141,10 @@ retry, stop, and partial-run rules.
   simulated sign-in; its Banking page does not actually require login.
 - Use only the site's public demo credentials and fictional sample data.
   Do not enter real passwords or personal information.
+- Portal credentials live in the tracked `process/config.csv`. The values in
+  this repository are the practice site's public demo credentials; a bot for a
+  real portal should not commit real ones. The bot does not print the
+  password in its logs.
 - Treat reports, screenshots, and downloaded files as potentially
   sensitive; the results CSV includes full local download paths.
 - An interrupted batch cannot resume automatically. Rerunning can download
@@ -153,10 +156,10 @@ retry, stop, and partial-run rules.
 
 | I want to... | Start here |
 | --- | --- |
-| Install, run, and inspect the demo | [Setup and operation](docs/technical/setup-and-operation.md) |
-| Understand the components and failure boundaries | [Architecture](docs/technical/architecture.md) |
-| Explore possible business applications | [Business use cases](docs/general/use-cases.md) |
-| Consider adapting the pattern to another process | [Adaptation guide](docs/technical/adaptation-guide.md) |
+| Install, run, and inspect the demo | [Setup and operation](docs/setup-and-operation.md) |
+| Understand the components, follow one transaction through the code, and see the failure boundaries | [Architecture](docs/architecture.md) |
+| Explore possible business applications | [Business use cases](docs/use-cases.md) |
+| Consider adapting the pattern to another process | [Adaptation guide](docs/adaptation-guide.md) |
 
 Before using an adaptation with real data, people must review its
 requirements, permissions, security, and test results.

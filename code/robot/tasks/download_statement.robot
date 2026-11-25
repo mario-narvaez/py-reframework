@@ -5,7 +5,7 @@ Resource         ../resources/demo_portal.resource
 Task Teardown    Finish Browser Session
 
 *** Variables ***
-${CONFIG_FILE}     ${CURDIR}${/}..${/}..${/}config${/}settings.csv
+${CONFIG_FILE}     ${CURDIR}${/}..${/}..${/}..${/}process${/}config.csv
 ${START_DATE}      ${EMPTY}
 ${END_DATE}        ${EMPTY}
 ${HEADLESS}        ${False}

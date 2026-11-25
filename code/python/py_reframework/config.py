@@ -1,7 +1,7 @@
-"""Load and validate non-secret settings from a CSV file."""
+"""Load and validate settings, including optional portal credentials, from a CSV file."""
 
 import csv
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -17,10 +17,17 @@ class Settings:
     retry_delay_seconds: int
     download_timeout_seconds: int
     demo_delay_seconds: int
+    portal_username: str = field(repr=False)
+    portal_password: str = field(repr=False)
 
+
+# These may be left empty when an execution platform supplies the credentials.
+_CREDENTIAL_SETTINGS = {"portal_username", "portal_password"}
 
 _REQUIRED_SETTINGS = {
     "portal_url",
+    "portal_username",
+    "portal_password",
     "input_csv",
     "output_dir",
     "max_retries",
@@ -53,7 +60,7 @@ def _read_settings(path: Path) -> dict[str, str]:
                     )
                 if name in settings:
                     raise ConfigurationError(f"Duplicate setting: {name}")
-                if not value:
+                if not value and name not in _CREDENTIAL_SETTINGS:
                     raise ConfigurationError(f"Setting must not be empty: {name}")
                 settings[name] = value
     except (OSError, UnicodeError, csv.Error) as error:
@@ -142,4 +149,6 @@ def load_settings(path: str | Path) -> Settings:
             "download_timeout_seconds", values["download_timeout_seconds"], 300, 1
         ),
         demo_delay_seconds=delays[preset],
+        portal_username=values["portal_username"],
+        portal_password=values["portal_password"],
     )

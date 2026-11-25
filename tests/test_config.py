@@ -9,6 +9,8 @@ from py_reframework.exceptions import ConfigurationError, SystemFailure
 
 VALID_SETTINGS = {
     "portal_url": "https://example.com/demo/",
+    "portal_username": "demo-user",
+    "portal_password": "demo-password",
     "input_csv": "../process/input/transactions.csv",
     "output_dir": "../process/output/runs",
     "max_retries": "2",
@@ -43,17 +45,32 @@ def test_loads_settings_and_resolves_paths_relative_to_csv(tmp_path: Path) -> No
     assert settings.retry_delay_seconds == 5
     assert settings.download_timeout_seconds == 30
     assert settings.demo_delay_seconds == 1
+    assert settings.portal_username == "demo-user"
+    assert settings.portal_password == "demo-password"
 
 
 def test_repository_settings_load() -> None:
-    path = Path(__file__).resolve().parents[1] / "config" / "settings.csv"
+    path = Path(__file__).resolve().parents[1] / "process" / "config.csv"
     settings = load_settings(path)
     assert settings.portal_url == "https://hash-chandra.github.io/demowebapp/"
-    assert settings.input_csv == path.parents[2] / "process" / "input" / "transactions.csv"
+    assert settings.input_csv == path.parent / "input" / "transactions.csv"
     assert settings.input_csv.is_file()
-    assert settings.output_dir == path.parents[2] / "process" / "output" / "runs"
+    assert settings.output_dir == path.parent / "output" / "runs"
     assert settings.max_retries == 1
     assert settings.retry_delay_seconds == 5
+
+
+def test_credentials_may_be_empty_and_are_not_shown_in_the_settings_repr(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "settings.csv"
+    write_settings(path, {**VALID_SETTINGS, "portal_username": "", "portal_password": ""})
+    empty = load_settings(path)
+    assert empty.portal_username == ""
+    assert empty.portal_password == ""
+
+    write_settings(path, VALID_SETTINGS)
+    assert "demo-password" not in repr(load_settings(path))
 
 
 @pytest.mark.parametrize(
@@ -133,4 +150,13 @@ def test_rejects_missing_demo_setting(tmp_path: Path) -> None:
     del settings["demo_delay_medium_seconds"]
     write_settings(path, settings)
     with pytest.raises(ConfigurationError, match="demo_delay_medium_seconds"):
+        load_settings(path)
+
+
+def test_rejects_missing_credential_settings(tmp_path: Path) -> None:
+    path = tmp_path / "settings.csv"
+    settings = VALID_SETTINGS.copy()
+    del settings["portal_password"]
+    write_settings(path, settings)
+    with pytest.raises(ConfigurationError, match="portal_password"):
         load_settings(path)

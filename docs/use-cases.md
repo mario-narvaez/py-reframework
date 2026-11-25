@@ -1,6 +1,6 @@
 # Business use cases
 
-[Back to the project overview](../../README.md)
+[Back to the project overview](../README.md)
 
 This guide is for business and operations teams. It explains what the demo's
 pattern could support; **none of the future examples below is implemented**.

@@ -1,7 +1,9 @@
 setting,value
 portal_url,https://hash-chandra.github.io/demowebapp/
-input_csv,../../process/input/transactions.csv
-output_dir,../../process/output/runs
+portal_username,admin
+portal_password,admin123
+input_csv,input/transactions.csv
+output_dir,output/runs
 max_retries,1
 retry_delay_seconds,5
 download_timeout_seconds,30

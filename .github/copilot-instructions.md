@@ -50,13 +50,17 @@ structured data for consolidation.
   Avoid screen coordinates, generated attributes, long structural paths, and
   positional selection unless necessary. Keep Browser's strict matching on
   and verify that selectors identify the intended element.
-- Prefer CSV for transaction input, output, and non-secret settings when
+- Prefer CSV for transaction input, output, and operator settings when
   appropriate. Keep configuration centralized and validate required settings,
   types, and paths. Avoid hardcoding environment-specific URLs, credentials,
   and operational settings in automation logic.
-- Keep credentials in environment variables or a suitable secret manager. A
-  local `.env` may be used for development; keep it ignored and provide a
-  `.env.example` containing placeholder values only when setup is implemented.
+- Operator settings, including portal credentials, live in the tracked
+  `process/config.csv`, which holds only the practice site's public demo
+  values. A bot for a real portal must not commit real credentials. A complete
+  `PORTAL_USERNAME` and `PORTAL_PASSWORD` pair in the environment takes
+  precedence, so an execution platform or secret manager can supply
+  credentials; an incomplete pair must fail clearly. Never print credentials
+  in logs, reports, or error messages.
 - Excel output is optional, not a v1 requirement. Add pandas or openpyxl only
   when the implemented work needs them.
 
