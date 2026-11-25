@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 
 PAGE = """<!doctype html>
 <nav><a href="/login">Login</a></nav>
@@ -154,7 +154,7 @@ def portal():
 
 def prepare_batch(
     tmp_path: Path, portal, rows: str, delay: int = 0, username: str = "admin",
-    retries: int = 1, password: str = "admin123",
+    retries: int = 1, password: str = "admin123", credentials_in_config: bool = False,
 ):
     input_dir = tmp_path / "process" / "input"
     input_dir.mkdir(parents=True, exist_ok=True)
@@ -162,8 +162,10 @@ def prepare_batch(
         "transaction_id,start_date,end_date\n" + rows, encoding="utf-8"
     )
     config = tmp_path / "settings.csv"
+    config_credentials = (username, password) if credentials_in_config else ("", "")
     config.write_text(
         f"setting,value\nportal_url,http://127.0.0.1:{portal.server_port}/\n"
+        f"portal_username,{config_credentials[0]}\nportal_password,{config_credentials[1]}\n"
         "input_csv,process/input/transactions.csv\noutput_dir,process/output/runs\n"
         f"max_retries,{retries}\nretry_delay_seconds,{delay}\ndownload_timeout_seconds,10\n"
         "demo_delay_preset,short\n"
@@ -173,14 +175,18 @@ def prepare_batch(
         encoding="utf-8",
     )
     env = os.environ.copy()
-    env["PYTHONPATH"] = str(ROOT / "technical" / "python_code")
-    env["PORTAL_USERNAME"] = username
-    env["PORTAL_PASSWORD"] = password
+    env["PYTHONPATH"] = str(ROOT / "code" / "python")
+    if credentials_in_config:
+        env.pop("PORTAL_USERNAME", None)
+        env.pop("PORTAL_PASSWORD", None)
+    else:
+        env["PORTAL_USERNAME"] = username
+        env["PORTAL_PASSWORD"] = password
     command = [
         sys.executable, "-m", "robot", "--outputdir", str(tmp_path / "process" / "output" / "reports" / "robot"),
         "--variable", f"CONFIG_FILE:{config}",
         "--variable", "HEADLESS:True",
-        str(ROOT / "technical" / "robot" / "tasks" / "process_transactions.robot"),
+        str(ROOT / "code" / "robot" / "tasks" / "process_transactions.robot"),
     ]
     return command, env
 
@@ -227,9 +233,11 @@ def assert_failure_screenshot(tmp_path: Path, parent_keyword: str) -> None:
 
 def run_batch(
     tmp_path: Path, portal, rows: str, username: str = "admin", delay: int = 0,
-    retries: int = 1, password: str = "admin123",
+    retries: int = 1, password: str = "admin123", credentials_in_config: bool = False,
 ) -> tuple[subprocess.CompletedProcess, list[dict]]:
-    command, env = prepare_batch(tmp_path, portal, rows, delay, username, retries, password)
+    command, env = prepare_batch(
+        tmp_path, portal, rows, delay, username, retries, password, credentials_in_config
+    )
     result = subprocess.run(command, cwd=tmp_path, env=env, capture_output=True, text=True, timeout=90)
     return result, read_results(tmp_path)
 
@@ -262,7 +270,7 @@ def test_single_statement_uses_dated_run_download_folder(tmp_path: Path, portal)
     command[-1:] = [
         "--variable", "START_DATE:2025-01-01",
         "--variable", "END_DATE:2025-01-31",
-        str(ROOT / "technical" / "robot" / "tasks" / "download_statement.robot"),
+        str(ROOT / "code" / "robot" / "tasks" / "download_statement.robot"),
     ]
     result = subprocess.run(
         command, cwd=tmp_path, env=env, capture_output=True, text=True, timeout=90
@@ -274,6 +282,43 @@ def test_single_statement_uses_dated_run_download_folder(tmp_path: Path, portal)
     assert len(downloads) == 1
     assert re.fullmatch(r"\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}", downloads[0].parent.parent.name)
     assert "Date Range: 2025-01-01 to 2025-01-31" in downloads[0].read_text()
+
+
+@pytest.mark.parametrize("task", ["batch", "single"])
+def test_tasks_log_in_with_credentials_from_the_settings_file(
+    tmp_path: Path, portal, task: str
+) -> None:
+    command, env = prepare_batch(
+        tmp_path, portal, "one,2025-01-01,2025-01-31\n", credentials_in_config=True
+    )
+    if task == "single":
+        command[-1:] = [
+            "--variable", "START_DATE:2025-01-01",
+            "--variable", "END_DATE:2025-01-31",
+            str(ROOT / "code" / "robot" / "tasks" / "download_statement.robot"),
+        ]
+    result = subprocess.run(
+        command, cwd=tmp_path, env=env, capture_output=True, text=True, timeout=90
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "PORTAL_USERNAME" not in env
+    output = (
+        tmp_path / "process" / "output" / "reports" / "robot" / "output.xml"
+    ).read_text(encoding="utf-8")
+    assert "admin123" not in output
+    assert list((tmp_path / "process" / "output" / "runs").glob("*/downloads/statement-001.txt"))
+
+
+def test_incomplete_settings_credentials_stop_without_opening_a_browser(
+    tmp_path: Path, portal
+) -> None:
+    result, rows = run_batch(
+        tmp_path, portal, "one,2025-01-01,2025-01-31\n", password="", credentials_in_config=True
+    )
+    assert result.returncode != 0
+    assert rows == []
+    assert portal.requests == 0
+    assert "credentials are missing" in result.stdout
 
 
 def test_missing_dates_reach_disabled_apply_and_batch_continues(tmp_path: Path, portal) -> None:
@@ -329,7 +374,7 @@ def test_tasks_default_to_visible_browser(tmp_path: Path, portal, task: str) -> 
         command[-1:] = [
             "--variable", "START_DATE:2025-01-01",
             "--variable", "END_DATE:2025-01-31",
-            str(ROOT / "technical" / "robot" / "tasks" / "download_statement.robot"),
+            str(ROOT / "code" / "robot" / "tasks" / "download_statement.robot"),
         ]
     result = subprocess.run(
         command, cwd=tmp_path, env=env, capture_output=True, text=True, timeout=90

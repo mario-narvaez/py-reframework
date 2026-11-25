@@ -7,7 +7,7 @@ Resource         ../resources/demo_portal.resource
 Task Teardown    Finish Batch
 
 *** Variables ***
-${CONFIG_FILE}        ${CURDIR}${/}..${/}..${/}config${/}settings.csv
+${CONFIG_FILE}        ${CURDIR}${/}..${/}..${/}..${/}process${/}config.csv
 ${HEADLESS}           ${False}
 ${BROWSER_OPEN}       ${False}
 ${RUN_STATE}          ${None}
@@ -126,7 +126,7 @@ Ensure Portal Session
     IF    $state["session_ready"]
         RETURN    ${None}
     END
-    Validate Portal Credentials
+    Load Portal Credentials    ${CONFIG_FILE}
     ${http_status}=    Open Demo Portal    ${batch}[portal_url]    ${batch}[demo_delay_seconds]
     IF    $http_status in (502, 503, 504)
         Capture Failure Evidence

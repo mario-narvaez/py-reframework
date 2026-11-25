@@ -1,6 +1,6 @@
 *** Settings ***
 Documentation     Check navigation selectors against a local page with similar links.
-Resource          ../../robot/resources/demo_portal.resource
+Resource          ../../code/robot/resources/demo_portal.resource
 Suite Setup       New Browser    chromium
 Suite Teardown    Close Browser    ALL
 Test Teardown     Close Page    ALL

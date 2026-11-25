@@ -20,6 +20,8 @@ def paths(tmp_path: Path) -> tuple[Path, Path]:
     config.write_text(
         "setting,value\n"
         "portal_url,https://example.com/\n"
+        "portal_username,\n"
+        "portal_password,\n"
         "input_csv,input.csv\n"
         "output_dir,output\n"
         "max_retries,2\n"
