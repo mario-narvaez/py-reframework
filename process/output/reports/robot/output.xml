@@ -1,0 +1,4364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.5.1 (Python 3.11.0 on win32)" generated="2026-11-25T14:33:45.091218" rpa="true" schemaversion="5">
+<suite id="s1" name="Process Transactions" source="C:\Users\mario\Documents\Projects\py-reframework\code\robot\tasks\process_transactions.robot">
+<test id="s1-t1" name="Process Statement Transactions" line="17">
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-11-25T14:33:45.785771" level="INFO">${state} = {'session_ready': False, 'successes': 0, 'business_failures': 0, 'system_failures': 0, 'consecutive_failures': 0}</msg>
+<var>${state}</var>
+<arg>session_ready=${False}</arg>
+<arg>successes=${0}</arg>
+<arg>business_failures=${0}</arg>
+<arg>system_failures=${0}</arg>
+<arg>consecutive_failures=${0}</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="PASS" start="2026-11-25T14:33:45.784538" elapsed="0.001233"/>
+</kw>
+<kw name="Set Test Variable" owner="BuiltIn">
+<msg time="2026-11-25T14:33:45.786778" level="INFO">${RUN_STATE} = {'session_ready': False, 'successes': 0, 'business_failures': 0, 'system_failures': 0, 'consecutive_failures': 0}</msg>
+<arg>${RUN_STATE}</arg>
+<arg>${state}</arg>
+<doc>Makes the variable available everywhere within the scope of the current test.</doc>
+<status status="PASS" start="2026-11-25T14:33:45.785771" elapsed="0.001007"/>
+</kw>
+<kw name="Initialize Batch" owner="py_reframework.transactions">
+<msg time="2026-11-25T14:33:45.788161" level="INFO">${batch} = {'portal_url': 'https://hash-chandra.github.io/demowebapp/', 'download_timeout_seconds': 30, 'demo_delay_seconds': 1, 'max_retries': 1, 'retry_delay_seconds': 5, 'run_dir': 'C:\\Users\\mario\\Document...</msg>
+<var>${batch}</var>
+<arg>${CONFIG_FILE}</arg>
+<doc>Validate input and create a unique run folder with a results CSV.</doc>
+<status status="PASS" start="2026-11-25T14:33:45.786778" elapsed="0.001383"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-11-25T14:33:45.790829" level="INFO">Results CSV: C:\Users\mario\Documents\Projects\py-reframework\process\output\runs\2026-11-25_14-33-45\results.csv</msg>
+<arg>Results CSV: ${batch}[results_path]</arg>
+<arg>console=${True}</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-11-25T14:33:45.790829" elapsed="0.000000"/>
+</kw>
+<kw name="Initialize Portal Session">
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:33:45.792945" level="INFO">${maximum_attempts} = 2</msg>
+<var>${maximum_attempts}</var>
+<arg>$batch["max_retries"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:33:45.790829" elapsed="0.002116"/>
+</kw>
+<for flavor="IN RANGE">
+<iter>
+<kw name="Ensure Portal Session">
+<if>
+<branch type="IF" condition="$state[&quot;session_ready&quot;]">
+<return>
+<value>${None}</value>
+<status status="NOT RUN" start="2026-11-25T14:33:45.794952" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:33:45.794952" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:33:45.794952" elapsed="0.000000"/>
+</if>
+<kw name="Load Portal Credentials" owner="py_reframework.portal_support">
+<arg>${CONFIG_FILE}</arg>
+<doc>Make the portal credentials available to the login keyword.</doc>
+<status status="PASS" start="2026-11-25T14:33:45.794952" elapsed="0.000000"/>
+</kw>
+<kw name="Open Demo Portal" owner="demo_portal">
+<kw name="Convert To Boolean" owner="BuiltIn">
+<msg time="2026-11-25T14:33:45.794952" level="INFO">${headless} = True</msg>
+<var>${headless}</var>
+<arg>${HEADLESS}</arg>
+<doc>Converts the given item to Boolean `True` or `False`.</doc>
+<status status="PASS" start="2026-11-25T14:33:45.794952" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="${headless}">
+<kw name="New Browser" owner="Browser">
+<msg time="2026-11-25T14:33:45.794952" level="INFO">{"browser": "chromium", "headless": true, "chromiumSandbox": false, "devtools": false, "handleSIGHUP": true, "handleSIGINT": true, "handleSIGTERM": true, "slowMo": 0.0, "timeout": 30000.0, "tracesDir": "C:\\Users\\mario\\Documents\\Projects\\py-reframework\\process\\output\\reports\\robot\\browser\\traces\\temp\\90ef52b9-06ca-445c-9918-981ed04ad223"}</msg>
+<msg time="2026-11-25T14:33:45.794952" level="INFO">Starting Browser process C:\Users\mario\Documents\Projects\py-reframework\.venv\Lib\site-packages\BrowserBatteries\bin\wrapper\index.js using at 127.0.0.1:64548</msg>
+<msg time="2026-11-25T14:33:57.670799" level="INFO">Successfully created browser with options: {"browser":"chromium","headless":true,"chromiumSandbox":false,"devtools":false,"handleSIGHUP":true,"handleSIGINT":true,"handleSIGTERM":true,"slowMo":0,"timeout":30000,"tracesDir":"C:\\Users\\mario\\Documents\\Projects\\py-reframework\\process\\output\\reports\\robot\\browser\\traces\\temp\\90ef52b9-06ca-445c-9918-981ed04ad223"}</msg>
+<arg>chromium</arg>
+<arg>headless=${True}</arg>
+<tag>BrowserControl</tag>
+<tag>Setter</tag>
+<doc>Create a new playwright Browser with specified options.</doc>
+<status status="PASS" start="2026-11-25T14:33:45.794952" elapsed="11.877855"/>
+</kw>
+<status status="PASS" start="2026-11-25T14:33:45.794952" elapsed="11.877855"/>
+</branch>
+<branch type="ELSE">
+<kw name="New Browser" owner="Browser">
+<arg>chromium</arg>
+<arg>headless=${False}</arg>
+<arg>slowMo=${demo_delay_seconds} seconds</arg>
+<tag>BrowserControl</tag>
+<tag>Setter</tag>
+<doc>Create a new playwright Browser with specified options.</doc>
+<status status="NOT RUN" start="2026-11-25T14:33:57.672807" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:33:57.672807" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:33:45.794952" elapsed="11.877855"/>
+</if>
+<kw name="Set Suite Variable" owner="BuiltIn">
+<msg time="2026-11-25T14:33:57.674817" level="INFO">${BROWSER_OPEN} = True</msg>
+<arg>${BROWSER_OPEN}</arg>
+<arg>${True}</arg>
+<doc>Makes the variable available everywhere within the scope of the current suite.</doc>
+<status status="PASS" start="2026-11-25T14:33:57.672807" elapsed="0.002010"/>
+</kw>
+<kw name="New Context" owner="Browser">
+<msg time="2026-11-25T14:33:57.674817" level="INFO">{
+  "acceptDownloads": true,
+  "bypassCSP": false,
+  "forcedColors": "none",
+  "ignoreHTTPSErrors": false,
+  "javaScriptEnabled": true,
+  "offline": false,
+  "reducedMotion": "no-preference",
+  "serviceWorkers": "allow",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  }
+}</msg>
+<msg time="2026-11-25T14:33:57.690043" level="INFO">Successfully created context. </msg>
+<msg time="2026-11-25T14:33:57.690043" level="INFO">{'acceptDownloads': True, 'bypassCSP': False, 'forcedColors': 'none', 'ignoreHTTPSErrors': False, 'javaScriptEnabled': True, 'offline': False, 'reducedMotion': 'no-preference', 'serviceWorkers': 'allow', 'viewport': {'width': 1280, 'height': 720}}</msg>
+<arg>acceptDownloads=${True}</arg>
+<tag>BrowserControl</tag>
+<tag>Setter</tag>
+<doc>Create a new BrowserContext with specified options.</doc>
+<status status="PASS" start="2026-11-25T14:33:57.674817" elapsed="0.015226"/>
+</kw>
+<kw name="New Page" owner="Browser">
+<msg time="2026-11-25T14:33:57.769176" level="INFO">Successfully initialized new page object and opened url: about:blank</msg>
+<tag>BrowserControl</tag>
+<tag>Setter</tag>
+<doc>Open a new Page.</doc>
+<status status="PASS" start="2026-11-25T14:33:57.690043" elapsed="0.079133"/>
+</kw>
+<kw name="Go To" owner="Browser">
+<msg time="2026-11-25T14:34:01.106432" level="INFO">Successfully opened URL https://hash-chandra.github.io/demowebapp/</msg>
+<msg time="2026-11-25T14:34:01.106432" level="INFO">${status} = 200</msg>
+<var>${status}</var>
+<arg>${portal_url}</arg>
+<tag>BrowserControl</tag>
+<tag>Setter</tag>
+<doc>Navigates to the given ``url``.</doc>
+<status status="PASS" start="2026-11-25T14:33:57.769176" elapsed="3.337256"/>
+</kw>
+<return>
+<value>${status}</value>
+<status status="PASS" start="2026-11-25T14:34:01.106432" elapsed="0.003014"/>
+</return>
+<msg time="2026-11-25T14:34:01.109446" level="INFO">${http_status} = 200</msg>
+<var>${http_status}</var>
+<arg>${batch}[portal_url]</arg>
+<arg>${batch}[demo_delay_seconds]</arg>
+<status status="PASS" start="2026-11-25T14:33:45.794952" elapsed="15.314494"/>
+</kw>
+<if>
+<branch type="IF" condition="$http_status in (502, 503, 504)">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:01.109446" elapsed="0.000000"/>
+</kw>
+<kw name="Close Portal Session">
+<status status="NOT RUN" start="2026-11-25T14:34:01.109446" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${http_status}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:01.109446" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:01.109446" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:01.109446" elapsed="0.000000"/>
+</if>
+<if>
+<branch type="IF" condition="${http_status} &lt; 200 or ${http_status} &gt;= 400">
+<kw name="Fail" owner="BuiltIn">
+<arg>Portal returned non-retryable HTTP status ${http_status}.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:01.109446" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:01.109446" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:01.109446" elapsed="0.000000"/>
+</if>
+<kw name="Log In To Demo Portal" owner="demo_portal">
+<kw name="Click" owner="Browser">
+<msg time="2026-11-25T14:34:01.112229" level="INFO">Clicks the element 'css=nav &gt;&gt; role=link[name="Login"]'.</msg>
+<arg>${LOGIN_LINK}</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Simulates mouse click on the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:01.109446" elapsed="0.230888"/>
+</kw>
+<kw name="Click" owner="Browser">
+<msg time="2026-11-25T14:34:01.340334" level="INFO">Clicks the element 'data-testid=sidebar-toggle'.</msg>
+<arg>data-testid=sidebar-toggle</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Simulates mouse click on the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:01.340334" elapsed="0.050466"/>
+</kw>
+<kw name="Fill Secret" owner="Browser">
+<arg>data-testid=username-input</arg>
+<arg>%PORTAL_USERNAME</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Fills the given ``secret`` into the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:01.390800" elapsed="0.138376"/>
+</kw>
+<kw name="Fill Secret" owner="Browser">
+<arg>data-testid=password-input</arg>
+<arg>%PORTAL_PASSWORD</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Fills the given ``secret`` into the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:01.529176" elapsed="0.076487"/>
+</kw>
+<kw name="Click" owner="Browser">
+<msg time="2026-11-25T14:34:01.605663" level="INFO">Clicks the element 'data-testid=login-button'.</msg>
+<arg>data-testid=login-button</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Simulates mouse click on the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:01.605663" elapsed="0.068541"/>
+</kw>
+<kw name="Wait For Elements State" owner="Browser">
+<msg time="2026-11-25T14:34:03.524804" level="INFO">Waited for Element with selector css=[data-testid="close-success-dialog"], [data-testid="username-error"] at state visible</msg>
+<arg>css=[data-testid="close-success-dialog"], [data-testid="username-error"]</arg>
+<arg>visible</arg>
+<tag>PageContent</tag>
+<tag>Wait</tag>
+<doc>Waits for the element found by ``selector`` to satisfy state option.</doc>
+<status status="PASS" start="2026-11-25T14:34:01.674204" elapsed="1.850600"/>
+</kw>
+<kw name="Get Element Count" owner="Browser">
+<msg time="2026-11-25T14:34:03.530847" level="INFO">${error_count} = 0</msg>
+<var>${error_count}</var>
+<arg>data-testid=username-error</arg>
+<tag>Assertion</tag>
+<tag>Getter</tag>
+<tag>PageContent</tag>
+<doc>Returns the count of elements found with ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:03.524804" elapsed="0.006043"/>
+</kw>
+<if>
+<branch type="IF" condition="${error_count} &gt; 0">
+<kw name="Fail" owner="BuiltIn">
+<arg>Demo portal rejected the supplied credentials.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:03.530847" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:03.530847" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:03.530847" elapsed="0.000000"/>
+</if>
+<kw name="Click" owner="Browser">
+<msg time="2026-11-25T14:34:03.530847" level="INFO">Clicks the element 'data-testid=close-success-dialog'.</msg>
+<arg>data-testid=close-success-dialog</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Simulates mouse click on the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:03.530847" elapsed="0.030494"/>
+</kw>
+<status status="PASS" start="2026-11-25T14:34:01.109446" elapsed="2.451895"/>
+</kw>
+<kw name="Open Banking Page" owner="demo_portal">
+<kw name="Click" owner="Browser">
+<msg time="2026-11-25T14:34:03.561341" level="INFO">Clicks the element 'data-testid=sidebar-toggle'.</msg>
+<arg>data-testid=sidebar-toggle</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Simulates mouse click on the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:03.561341" elapsed="0.034398"/>
+</kw>
+<kw name="Click" owner="Browser">
+<msg time="2026-11-25T14:34:03.595739" level="INFO">Clicks the element 'data-testid=sidebar &gt;&gt; css=a[href$="/banking"]'.</msg>
+<arg>${BANKING_LINK}</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Simulates mouse click on the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:03.595739" elapsed="0.425775"/>
+</kw>
+<kw name="Click" owner="Browser">
+<msg time="2026-11-25T14:34:04.021514" level="INFO">Clicks the element 'data-testid=sidebar-toggle'.</msg>
+<arg>data-testid=sidebar-toggle</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Simulates mouse click on the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:04.021514" elapsed="0.391492"/>
+</kw>
+<kw name="Wait For Elements State" owner="Browser">
+<msg time="2026-11-25T14:34:04.415013" level="INFO">Waited for Element with selector data-testid=start-date at state visible</msg>
+<arg>data-testid=start-date</arg>
+<arg>visible</arg>
+<tag>PageContent</tag>
+<tag>Wait</tag>
+<doc>Waits for the element found by ``selector`` to satisfy state option.</doc>
+<status status="PASS" start="2026-11-25T14:34:04.413006" elapsed="0.002007"/>
+</kw>
+<status status="PASS" start="2026-11-25T14:34:03.561341" elapsed="0.853672"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>session_ready=${True}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="PASS" start="2026-11-25T14:34:04.415013" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${None}</value>
+<status status="PASS" start="2026-11-25T14:34:04.415013" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:04.415013" level="INFO">${temporary_status} = None</msg>
+<var>${temporary_status}</var>
+<arg>${batch}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:33:45.794952" elapsed="18.620061"/>
+</kw>
+<if>
+<branch type="IF" condition="$temporary_status is None">
+<return>
+<status status="PASS" start="2026-11-25T14:34:04.415013" elapsed="0.000000"/>
+</return>
+<status status="PASS" start="2026-11-25T14:34:04.415013" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:04.415013" elapsed="0.000000"/>
+</if>
+<if>
+<branch type="IF" condition="${index} + 1 &lt; ${maximum_attempts}">
+<kw name="Log" owner="BuiltIn">
+<arg>Portal returned HTTP ${temporary_status}; retrying after ${batch}[retry_delay_seconds] seconds.</arg>
+<arg>console=${True}</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:04.418853" elapsed="0.000000"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<arg>${batch}[retry_delay_seconds] seconds</arg>
+<doc>Pauses execution for the given time.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:04.418853" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:04.415013" elapsed="0.003840"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:04.415013" elapsed="0.003840"/>
+</if>
+<var name="${index}">0</var>
+<status status="PASS" start="2026-11-25T14:33:45.792945" elapsed="18.625908"/>
+</iter>
+<var>${index}</var>
+<value>${maximum_attempts}</value>
+<status status="PASS" start="2026-11-25T14:33:45.792945" elapsed="18.625908"/>
+</for>
+<kw name="Fail" owner="BuiltIn">
+<arg>Initialization failed: portal returned temporary HTTP ${temporary_status}; retries exhausted.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:04.418853" elapsed="0.000000"/>
+</kw>
+<arg>${batch}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:33:45.790829" elapsed="18.628024"/>
+</kw>
+<for flavor="IN">
+<iter>
+<kw name="Process Transaction With Recovery">
+<if>
+<branch type="IF" condition="$transaction[&quot;error&quot;]">
+<kw name="Record Transaction Result" owner="py_reframework.transactions">
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>business_failure</arg>
+<arg>error=${transaction}[error]</arg>
+<arg>attempts=${0}</arg>
+<doc>Append one completed transaction to the results CSV.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:04.418853" elapsed="0.000000"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${count}</var>
+<arg>$state["business_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:04.418853" elapsed="0.002007"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>business_failures=${count}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:04.420860" elapsed="0.000000"/>
+</kw>
+<return>
+<status status="NOT RUN" start="2026-11-25T14:34:04.420860" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:04.418853" elapsed="0.002007"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:04.418853" elapsed="0.002007"/>
+</if>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:34:04.420860" level="INFO">${maximum_attempts} = 2</msg>
+<var>${maximum_attempts}</var>
+<arg>$batch["max_retries"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:34:04.420860" elapsed="0.000000"/>
+</kw>
+<for flavor="IN RANGE">
+<iter>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:34:04.420860" level="INFO">${attempt} = 1</msg>
+<var>${attempt}</var>
+<arg>$index + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:34:04.420860" elapsed="0.000000"/>
+</kw>
+<try>
+<branch type="TRY">
+<kw name="Process Statement Attempt">
+<kw name="Ensure Portal Session">
+<if>
+<branch type="IF" condition="$state[&quot;session_ready&quot;]">
+<return>
+<value>${None}</value>
+<status status="PASS" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</return>
+<status status="PASS" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</if>
+<kw name="Load Portal Credentials" owner="py_reframework.portal_support">
+<arg>${CONFIG_FILE}</arg>
+<doc>Make the portal credentials available to the login keyword.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</kw>
+<kw name="Open Demo Portal" owner="demo_portal">
+<var>${http_status}</var>
+<arg>${batch}[portal_url]</arg>
+<arg>${batch}[demo_delay_seconds]</arg>
+<status status="NOT RUN" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="$http_status in (502, 503, 504)">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</kw>
+<kw name="Close Portal Session">
+<status status="NOT RUN" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${http_status}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</if>
+<if>
+<branch type="IF" condition="${http_status} &lt; 200 or ${http_status} &gt;= 400">
+<kw name="Fail" owner="BuiltIn">
+<arg>Portal returned non-retryable HTTP status ${http_status}.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</if>
+<kw name="Log In To Demo Portal" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</kw>
+<kw name="Open Banking Page" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>session_ready=${True}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${None}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:04.425057" level="INFO">${temporary_status} = None</msg>
+<var>${temporary_status}</var>
+<arg>${batch}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="$temporary_status is not None">
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=retryable</arg>
+<arg>http_status=${temporary_status}</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Portal returned temporary HTTP ${temporary_status}; retries exhausted.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:04.425057" elapsed="0.000000"/>
+</if>
+<kw name="Apply Demo Date Range" owner="demo_portal">
+<kw name="Fill Text" owner="Browser">
+<msg time="2026-11-25T14:34:04.429243" level="INFO">Fills the text '2025-01-01' in the given field.</msg>
+<arg>data-testid=start-date</arg>
+<arg>${start_date}</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears and fills the given ``txt`` into the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:04.425057" elapsed="0.009984"/>
+</kw>
+<kw name="Fill Text" owner="Browser">
+<msg time="2026-11-25T14:34:04.442846" level="INFO">Fills the text '2025-01-31' in the given field.</msg>
+<arg>data-testid=end-date</arg>
+<arg>${end_date}</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears and fills the given ``txt`` into the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:04.442846" elapsed="0.006895"/>
+</kw>
+<kw name="Get Element States" owner="Browser">
+<msg time="2026-11-25T14:34:04.487765" level="INFO">States are: ['attached', 'visible', 'enabled', 'defocused']</msg>
+<msg time="2026-11-25T14:34:04.487765" level="INFO">${states} = ['attached', 'visible', 'enabled', 'defocused']</msg>
+<var>${states}</var>
+<arg>data-testid=apply-date-range</arg>
+<tag>Assertion</tag>
+<tag>Getter</tag>
+<tag>PageContent</tag>
+<doc>Get the active states from the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:04.449741" elapsed="0.038024"/>
+</kw>
+<if>
+<branch type="IF" condition="not $start_date or not $end_date">
+<if>
+<branch type="IF" condition="'disabled' not in $states">
+<kw name="Fail" owner="BuiltIn">
+<arg>Apply Range is unexpectedly enabled for an incomplete date range.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:04.493746" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:04.487765" elapsed="0.005981"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:04.487765" elapsed="0.005981"/>
+</if>
+<kw name="Clear Demo Dates" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:04.493746" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${False}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:04.493746" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:04.487765" elapsed="0.005981"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:04.487765" elapsed="0.005981"/>
+</if>
+<if>
+<branch type="IF" condition="'disabled' in $states">
+<kw name="Fail" owner="BuiltIn">
+<arg>Apply Range is unexpectedly disabled for a complete date range.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:04.493746" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:04.493746" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:04.493746" elapsed="0.000000"/>
+</if>
+<kw name="Click" owner="Browser">
+<msg time="2026-11-25T14:34:04.494752" level="INFO">Clicks the element 'data-testid=apply-date-range'.</msg>
+<arg>data-testid=apply-date-range</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Simulates mouse click on the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:04.493746" elapsed="0.033747"/>
+</kw>
+<kw name="Wait For Elements State" owner="Browser">
+<msg time="2026-11-25T14:34:04.530361" level="INFO">Waited for Element with selector data-testid=date-range-display at state visible</msg>
+<arg>data-testid=date-range-display</arg>
+<arg>visible</arg>
+<tag>PageContent</tag>
+<tag>Wait</tag>
+<doc>Waits for the element found by ``selector`` to satisfy state option.</doc>
+<status status="PASS" start="2026-11-25T14:34:04.527493" elapsed="0.002868"/>
+</kw>
+<kw name="Get Text" owner="Browser">
+<msg time="2026-11-25T14:34:04.535744" level="INFO">Text: ['Selected: 2025-01-01 to 2025-01-31 (30 days)']</msg>
+<msg time="2026-11-25T14:34:04.535744" level="INFO">${selected} = Selected: 2025-01-01 to 2025-01-31 (30 days)</msg>
+<var>${selected}</var>
+<arg>data-testid=date-range-display</arg>
+<tag>Assertion</tag>
+<tag>Getter</tag>
+<tag>PageContent</tag>
+<doc>Returns text attribute of the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:04.530361" elapsed="0.005383"/>
+</kw>
+<kw name="Should Match Regexp" owner="BuiltIn">
+<arg>${selected}</arg>
+<arg>^Selected: ${start_date} to ${end_date} \\(-?\\d+ days\\)$</arg>
+<doc>Fails if the `string` does not match the regular expression `pattern`.</doc>
+<status status="PASS" start="2026-11-25T14:34:04.535744" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${True}</value>
+<status status="PASS" start="2026-11-25T14:34:04.544050" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:04.544050" level="INFO">${applied} = True</msg>
+<var>${applied}</var>
+<arg>${transaction}[start_date]</arg>
+<arg>${transaction}[end_date]</arg>
+<status status="PASS" start="2026-11-25T14:34:04.425057" elapsed="0.118993"/>
+</kw>
+<if>
+<branch type="IF" condition="not ${applied}">
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=business_failure</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Apply Range was disabled because a date was missing.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:04.544050" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:04.544050" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:04.544050" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:04.544050" elapsed="0.000000"/>
+</if>
+<kw name="Reserve Batch Statement Path" owner="py_reframework.transactions">
+<msg time="2026-11-25T14:34:04.544050" level="INFO">${download_path} = C:\Users\mario\Documents\Projects\py-reframework\process\output\runs\2026-11-25_14-33-45\downloads\statement-001.txt</msg>
+<var>${download_path}</var>
+<arg>${batch}</arg>
+<status status="PASS" start="2026-11-25T14:34:04.544050" elapsed="0.000000"/>
+</kw>
+<kw name="Download Demo Statement" owner="demo_portal">
+<kw name="Promise To Wait For Download" owner="Browser">
+<msg time="2026-11-25T14:34:04.544050" level="INFO">${download} = &lt;Future at 0x212f55fa1d0 state=running&gt;</msg>
+<var>${download}</var>
+<arg>${download_path}</arg>
+<arg>download_timeout=${timeout_seconds} seconds</arg>
+<tag>BrowserControl</tag>
+<tag>Wait</tag>
+<doc>Returns a promise that waits for the next download event on the page.</doc>
+<status status="PASS" start="2026-11-25T14:34:04.544050" elapsed="0.000000"/>
+</kw>
+<kw name="Click" owner="Browser">
+<msg time="2026-11-25T14:34:04.544050" level="INFO">Clicks the element 'data-testid=download-statement'.</msg>
+<arg>data-testid=download-statement</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Simulates mouse click on the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:04.544050" elapsed="0.038156"/>
+</kw>
+<kw name="Wait For" owner="Browser">
+<msg time="2026-11-25T14:34:05.765550" level="INFO">${result} = {'saveAs': 'C:\\Users\\mario\\Documents\\Projects\\py-reframework\\process\\output\\runs\\2026-11-25_14-33-45\\downloads\\statement-001.txt', 'suggestedFilename': 'statement.txt', 'state': 'finished',...</msg>
+<var>${result}</var>
+<arg>${download}</arg>
+<tag>Wait</tag>
+<doc>Waits for promises to finish and returns results from them.</doc>
+<status status="PASS" start="2026-11-25T14:34:04.582206" elapsed="1.183344"/>
+</kw>
+<kw name="Should Be Equal" owner="BuiltIn">
+<arg>${result}[state]</arg>
+<arg>finished</arg>
+<doc>Fails if the given objects are unequal.</doc>
+<status status="PASS" start="2026-11-25T14:34:05.765550" elapsed="0.002014"/>
+</kw>
+<kw name="Clear Demo Dates" owner="demo_portal">
+<kw name="Clear Text" owner="Browser">
+<arg>data-testid=start-date</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:05.767564" elapsed="0.019866"/>
+</kw>
+<kw name="Clear Text" owner="Browser">
+<arg>data-testid=end-date</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:05.789475" elapsed="0.017762"/>
+</kw>
+<status status="PASS" start="2026-11-25T14:34:05.767564" elapsed="0.039673"/>
+</kw>
+<return>
+<value>${result}[saveAs]</value>
+<status status="PASS" start="2026-11-25T14:34:05.807237" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:05.807237" level="INFO">${path} = C:\Users\mario\Documents\Projects\py-reframework\process\output\runs\2026-11-25_14-33-45\downloads\statement-001.txt</msg>
+<var>${path}</var>
+<arg>${download_path}</arg>
+<arg>${batch}[download_timeout_seconds]</arg>
+<status status="PASS" start="2026-11-25T14:34:04.544050" elapsed="1.263187"/>
+</kw>
+<kw name="Check Demo Statement" owner="py_reframework.portal_support">
+<msg time="2026-11-25T14:34:05.810021" level="INFO">${valid} = True</msg>
+<var>${valid}</var>
+<arg>${path}</arg>
+<arg>${transaction}[start_date]</arg>
+<arg>${transaction}[end_date]</arg>
+<doc>Return whether the demo download contains the requested date range.</doc>
+<status status="PASS" start="2026-11-25T14:34:05.810021" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="not ${valid}">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:05.810021" elapsed="0.000000"/>
+</kw>
+<kw name="Close Portal Session">
+<status status="NOT RUN" start="2026-11-25T14:34:05.810021" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>session_ready=${False}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.810021" elapsed="0.000000"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=system_failure</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Downloaded statement does not contain the requested date range.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.810021" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:05.810021" elapsed="0.002013"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:05.810021" elapsed="0.002013"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:05.810021" elapsed="0.002013"/>
+</if>
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-11-25T14:34:05.812034" level="INFO">${result} = {'status': 'success', 'download_path': 'C:\\Users\\mario\\Documents\\Projects\\py-reframework\\process\\output\\runs\\2026-11-25_14-33-45\\downloads\\statement-001.txt', 'error': ''}</msg>
+<var>${result}</var>
+<arg>status=success</arg>
+<arg>download_path=${path}</arg>
+<arg>error=${EMPTY}</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="PASS" start="2026-11-25T14:34:05.812034" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="PASS" start="2026-11-25T14:34:05.812034" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:05.812034" level="INFO">${result} = {'status': 'success', 'download_path': 'C:\\Users\\mario\\Documents\\Projects\\py-reframework\\process\\output\\runs\\2026-11-25_14-33-45\\downloads\\statement-001.txt', 'error': ''}</msg>
+<var>${result}</var>
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:04.425057" elapsed="1.386977"/>
+</kw>
+<if>
+<branch type="IF" condition="$result[&quot;status&quot;] == &quot;retryable&quot;">
+<if>
+<branch type="IF" condition="${attempt} &lt; ${maximum_attempts}">
+<kw name="Log" owner="BuiltIn">
+<arg>Portal returned HTTP ${result}[http_status]; retrying after ${batch}[retry_delay_seconds] seconds.</arg>
+<arg>console=${True}</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.814045" elapsed="0.000000"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<arg>${batch}[retry_delay_seconds] seconds</arg>
+<doc>Pauses execution for the given time.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.814045" elapsed="0.000000"/>
+</kw>
+<continue>
+<status status="NOT RUN" start="2026-11-25T14:34:05.814045" elapsed="0.000000"/>
+</continue>
+<status status="NOT RUN" start="2026-11-25T14:34:05.812034" elapsed="0.002011"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:05.812034" elapsed="0.002011"/>
+</if>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${result}</arg>
+<arg>status=system_failure</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.814045" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:05.812034" elapsed="0.002011"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:05.812034" elapsed="0.002011"/>
+</if>
+<status status="PASS" start="2026-11-25T14:34:04.425057" elapsed="1.388988"/>
+</branch>
+<branch type="EXCEPT">
+<if>
+<branch type="IF" condition="${BROWSER_OPEN}">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:05.815557" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:05.815557" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:05.815557" elapsed="0.000000"/>
+</if>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=system_failure</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Non-retryable system failure; see Robot log.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.815557" elapsed="0.000000"/>
+</kw>
+<kw name="Record Transaction Outcome">
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<arg>${result}</arg>
+<arg>${attempt}</arg>
+<status status="NOT RUN" start="2026-11-25T14:34:05.815557" elapsed="0.000000"/>
+</kw>
+<kw name="Fail" owner="BuiltIn">
+<arg>Non-retryable system failure; see Robot log and results CSV.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.815557" elapsed="0.002013"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:05.814045" elapsed="0.003525"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:04.420860" elapsed="1.396710"/>
+</try>
+<kw name="Record Transaction Outcome">
+<kw name="Record Transaction Result" owner="py_reframework.transactions">
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${result}[status]</arg>
+<arg>download_path=${result}[download_path]</arg>
+<arg>error=${result}[error]</arg>
+<arg>attempts=${attempt}</arg>
+<doc>Append one completed transaction to the results CSV.</doc>
+<status status="PASS" start="2026-11-25T14:34:05.817570" elapsed="0.002013"/>
+</kw>
+<if>
+<branch type="IF" condition="$result[&quot;status&quot;] == &quot;success&quot;">
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:34:05.825461" level="INFO">${count} = 1</msg>
+<var>${count}</var>
+<arg>$state["successes"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:34:05.823430" elapsed="0.002031"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>successes=${count}</arg>
+<arg>consecutive_failures=${0}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="PASS" start="2026-11-25T14:34:05.825461" elapsed="0.000000"/>
+</kw>
+<status status="PASS" start="2026-11-25T14:34:05.821382" elapsed="0.004079"/>
+</branch>
+<branch type="ELSE IF" condition="$result[&quot;status&quot;] == &quot;business_failure&quot;">
+<kw name="Evaluate" owner="BuiltIn">
+<var>${count}</var>
+<arg>$state["business_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.825461" elapsed="0.002025"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>business_failures=${count}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.827486" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:05.825461" elapsed="0.002025"/>
+</branch>
+<branch type="ELSE">
+<kw name="Evaluate" owner="BuiltIn">
+<var>${count}</var>
+<arg>$state["system_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.827486" elapsed="0.000000"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${consecutive}</var>
+<arg>$state["consecutive_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.827486" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>system_failures=${count}</arg>
+<arg>consecutive_failures=${consecutive}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.827486" elapsed="0.002019"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:05.827486" elapsed="0.002019"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:05.821382" elapsed="0.008123"/>
+</if>
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<arg>${result}</arg>
+<arg>${attempt}</arg>
+<status status="PASS" start="2026-11-25T14:34:05.817570" elapsed="0.011935"/>
+</kw>
+<return>
+<status status="PASS" start="2026-11-25T14:34:05.829505" elapsed="0.000000"/>
+</return>
+<var name="${index}">0</var>
+<status status="PASS" start="2026-11-25T14:34:04.420860" elapsed="1.408645"/>
+</iter>
+<var>${index}</var>
+<value>${maximum_attempts}</value>
+<status status="PASS" start="2026-11-25T14:34:04.420860" elapsed="1.408645"/>
+</for>
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:04.418853" elapsed="1.410652"/>
+</kw>
+<kw name="Stop If Too Many System Failures">
+<if>
+<branch type="IF" condition="${state}[consecutive_failures] &gt;= ${OUTAGE_THRESHOLD}">
+<kw name="Fail" owner="BuiltIn">
+<arg>Stopped after ${state}[consecutive_failures] consecutive system failures; see results CSV.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.831521" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:05.831521" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:05.831521" elapsed="0.002209"/>
+</if>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:05.829505" elapsed="0.004225"/>
+</kw>
+<var name="${transaction}">{'transaction_id': 'period-001', 'start_date': '2025-01-01', 'end_date': '2025-01-31', 'error': ''}</var>
+<status status="PASS" start="2026-11-25T14:34:04.418853" elapsed="1.414877"/>
+</iter>
+<iter>
+<kw name="Process Transaction With Recovery">
+<if>
+<branch type="IF" condition="$transaction[&quot;error&quot;]">
+<kw name="Record Transaction Result" owner="py_reframework.transactions">
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>business_failure</arg>
+<arg>error=${transaction}[error]</arg>
+<arg>attempts=${0}</arg>
+<doc>Append one completed transaction to the results CSV.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.835182" elapsed="0.000000"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${count}</var>
+<arg>$state["business_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.835182" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>business_failures=${count}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.835182" elapsed="0.000000"/>
+</kw>
+<return>
+<status status="NOT RUN" start="2026-11-25T14:34:05.835182" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:05.835182" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:05.835182" elapsed="0.000000"/>
+</if>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:34:05.835182" level="INFO">${maximum_attempts} = 2</msg>
+<var>${maximum_attempts}</var>
+<arg>$batch["max_retries"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:34:05.835182" elapsed="0.000000"/>
+</kw>
+<for flavor="IN RANGE">
+<iter>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:34:05.841615" level="INFO">${attempt} = 1</msg>
+<var>${attempt}</var>
+<arg>$index + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:34:05.839604" elapsed="0.002011"/>
+</kw>
+<try>
+<branch type="TRY">
+<kw name="Process Statement Attempt">
+<kw name="Ensure Portal Session">
+<if>
+<branch type="IF" condition="$state[&quot;session_ready&quot;]">
+<return>
+<value>${None}</value>
+<status status="PASS" start="2026-11-25T14:34:05.841615" elapsed="0.000000"/>
+</return>
+<status status="PASS" start="2026-11-25T14:34:05.841615" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:05.841615" elapsed="0.000000"/>
+</if>
+<kw name="Load Portal Credentials" owner="py_reframework.portal_support">
+<arg>${CONFIG_FILE}</arg>
+<doc>Make the portal credentials available to the login keyword.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.841615" elapsed="0.000000"/>
+</kw>
+<kw name="Open Demo Portal" owner="demo_portal">
+<var>${http_status}</var>
+<arg>${batch}[portal_url]</arg>
+<arg>${batch}[demo_delay_seconds]</arg>
+<status status="NOT RUN" start="2026-11-25T14:34:05.841615" elapsed="0.003958"/>
+</kw>
+<if>
+<branch type="IF" condition="$http_status in (502, 503, 504)">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:05.845573" elapsed="0.000000"/>
+</kw>
+<kw name="Close Portal Session">
+<status status="NOT RUN" start="2026-11-25T14:34:05.845573" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${http_status}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:05.845573" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:05.845573" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:05.845573" elapsed="0.000000"/>
+</if>
+<if>
+<branch type="IF" condition="${http_status} &lt; 200 or ${http_status} &gt;= 400">
+<kw name="Fail" owner="BuiltIn">
+<arg>Portal returned non-retryable HTTP status ${http_status}.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.845573" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:05.845573" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:05.845573" elapsed="0.000000"/>
+</if>
+<kw name="Log In To Demo Portal" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:05.845573" elapsed="0.000000"/>
+</kw>
+<kw name="Open Banking Page" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:05.845573" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>session_ready=${True}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.845573" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${None}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:05.845573" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:05.845573" level="INFO">${temporary_status} = None</msg>
+<var>${temporary_status}</var>
+<arg>${batch}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:05.841615" elapsed="0.003958"/>
+</kw>
+<if>
+<branch type="IF" condition="$temporary_status is not None">
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=retryable</arg>
+<arg>http_status=${temporary_status}</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Portal returned temporary HTTP ${temporary_status}; retries exhausted.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.848099" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:05.848099" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:05.845573" elapsed="0.002526"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:05.845573" elapsed="0.002526"/>
+</if>
+<kw name="Apply Demo Date Range" owner="demo_portal">
+<kw name="Fill Text" owner="Browser">
+<msg time="2026-11-25T14:34:05.848099" level="INFO">Fills the text '2025-02-01' in the given field.</msg>
+<arg>data-testid=start-date</arg>
+<arg>${start_date}</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears and fills the given ``txt`` into the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:05.848099" elapsed="0.011945"/>
+</kw>
+<kw name="Fill Text" owner="Browser">
+<msg time="2026-11-25T14:34:05.860044" level="INFO">Fills the text '2025-02-28' in the given field.</msg>
+<arg>data-testid=end-date</arg>
+<arg>${end_date}</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears and fills the given ``txt`` into the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:05.860044" elapsed="0.009116"/>
+</kw>
+<kw name="Get Element States" owner="Browser">
+<msg time="2026-11-25T14:34:05.888755" level="INFO">States are: ['attached', 'visible', 'enabled', 'defocused']</msg>
+<msg time="2026-11-25T14:34:05.888755" level="INFO">${states} = ['attached', 'visible', 'enabled', 'defocused']</msg>
+<var>${states}</var>
+<arg>data-testid=apply-date-range</arg>
+<tag>Assertion</tag>
+<tag>Getter</tag>
+<tag>PageContent</tag>
+<doc>Get the active states from the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:05.869160" elapsed="0.019595"/>
+</kw>
+<if>
+<branch type="IF" condition="not $start_date or not $end_date">
+<if>
+<branch type="IF" condition="'disabled' not in $states">
+<kw name="Fail" owner="BuiltIn">
+<arg>Apply Range is unexpectedly enabled for an incomplete date range.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.888755" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:05.888755" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:05.888755" elapsed="0.000000"/>
+</if>
+<kw name="Clear Demo Dates" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:05.888755" elapsed="0.008377"/>
+</kw>
+<return>
+<value>${False}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:05.897132" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:05.888755" elapsed="0.008377"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:05.888755" elapsed="0.008377"/>
+</if>
+<if>
+<branch type="IF" condition="'disabled' in $states">
+<kw name="Fail" owner="BuiltIn">
+<arg>Apply Range is unexpectedly disabled for a complete date range.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.897132" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:05.897132" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:05.897132" elapsed="0.000000"/>
+</if>
+<kw name="Click" owner="Browser">
+<msg time="2026-11-25T14:34:05.897132" level="INFO">Clicks the element 'data-testid=apply-date-range'.</msg>
+<arg>data-testid=apply-date-range</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Simulates mouse click on the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:05.897132" elapsed="0.032413"/>
+</kw>
+<kw name="Wait For Elements State" owner="Browser">
+<msg time="2026-11-25T14:34:05.929545" level="INFO">Waited for Element with selector data-testid=date-range-display at state visible</msg>
+<arg>data-testid=date-range-display</arg>
+<arg>visible</arg>
+<tag>PageContent</tag>
+<tag>Wait</tag>
+<doc>Waits for the element found by ``selector`` to satisfy state option.</doc>
+<status status="PASS" start="2026-11-25T14:34:05.929545" elapsed="0.000000"/>
+</kw>
+<kw name="Get Text" owner="Browser">
+<msg time="2026-11-25T14:34:05.945725" level="INFO">Text: ['Selected: 2025-02-01 to 2025-02-28 (27 days)']</msg>
+<msg time="2026-11-25T14:34:05.945725" level="INFO">${selected} = Selected: 2025-02-01 to 2025-02-28 (27 days)</msg>
+<var>${selected}</var>
+<arg>data-testid=date-range-display</arg>
+<tag>Assertion</tag>
+<tag>Getter</tag>
+<tag>PageContent</tag>
+<doc>Returns text attribute of the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:05.929545" elapsed="0.016180"/>
+</kw>
+<kw name="Should Match Regexp" owner="BuiltIn">
+<arg>${selected}</arg>
+<arg>^Selected: ${start_date} to ${end_date} \\(-?\\d+ days\\)$</arg>
+<doc>Fails if the `string` does not match the regular expression `pattern`.</doc>
+<status status="PASS" start="2026-11-25T14:34:05.945725" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${True}</value>
+<status status="PASS" start="2026-11-25T14:34:05.945725" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:05.945725" level="INFO">${applied} = True</msg>
+<var>${applied}</var>
+<arg>${transaction}[start_date]</arg>
+<arg>${transaction}[end_date]</arg>
+<status status="PASS" start="2026-11-25T14:34:05.848099" elapsed="0.097626"/>
+</kw>
+<if>
+<branch type="IF" condition="not ${applied}">
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=business_failure</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Apply Range was disabled because a date was missing.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:05.945725" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:05.945725" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:05.945725" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:05.945725" elapsed="0.000000"/>
+</if>
+<kw name="Reserve Batch Statement Path" owner="py_reframework.transactions">
+<msg time="2026-11-25T14:34:05.945725" level="INFO">${download_path} = C:\Users\mario\Documents\Projects\py-reframework\process\output\runs\2026-11-25_14-33-45\downloads\statement-002.txt</msg>
+<var>${download_path}</var>
+<arg>${batch}</arg>
+<status status="PASS" start="2026-11-25T14:34:05.945725" elapsed="0.000000"/>
+</kw>
+<kw name="Download Demo Statement" owner="demo_portal">
+<kw name="Promise To Wait For Download" owner="Browser">
+<msg time="2026-11-25T14:34:05.945725" level="INFO">${download} = &lt;Future at 0x212f562fd10 state=pending&gt;</msg>
+<var>${download}</var>
+<arg>${download_path}</arg>
+<arg>download_timeout=${timeout_seconds} seconds</arg>
+<tag>BrowserControl</tag>
+<tag>Wait</tag>
+<doc>Returns a promise that waits for the next download event on the page.</doc>
+<status status="PASS" start="2026-11-25T14:34:05.945725" elapsed="0.000000"/>
+</kw>
+<kw name="Click" owner="Browser">
+<msg time="2026-11-25T14:34:05.945725" level="INFO">Clicks the element 'data-testid=download-statement'.</msg>
+<arg>data-testid=download-statement</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Simulates mouse click on the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:05.945725" elapsed="0.048742"/>
+</kw>
+<kw name="Wait For" owner="Browser">
+<msg time="2026-11-25T14:34:07.058395" level="INFO">${result} = {'saveAs': 'C:\\Users\\mario\\Documents\\Projects\\py-reframework\\process\\output\\runs\\2026-11-25_14-33-45\\downloads\\statement-002.txt', 'suggestedFilename': 'statement.txt', 'state': 'finished',...</msg>
+<var>${result}</var>
+<arg>${download}</arg>
+<tag>Wait</tag>
+<doc>Waits for promises to finish and returns results from them.</doc>
+<status status="PASS" start="2026-11-25T14:34:05.994467" elapsed="1.063928"/>
+</kw>
+<kw name="Should Be Equal" owner="BuiltIn">
+<arg>${result}[state]</arg>
+<arg>finished</arg>
+<doc>Fails if the given objects are unequal.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.058395" elapsed="0.000000"/>
+</kw>
+<kw name="Clear Demo Dates" owner="demo_portal">
+<kw name="Clear Text" owner="Browser">
+<arg>data-testid=start-date</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.058395" elapsed="0.009548"/>
+</kw>
+<kw name="Clear Text" owner="Browser">
+<arg>data-testid=end-date</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.067943" elapsed="0.004876"/>
+</kw>
+<status status="PASS" start="2026-11-25T14:34:07.058395" elapsed="0.019141"/>
+</kw>
+<return>
+<value>${result}[saveAs]</value>
+<status status="PASS" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:07.077536" level="INFO">${path} = C:\Users\mario\Documents\Projects\py-reframework\process\output\runs\2026-11-25_14-33-45\downloads\statement-002.txt</msg>
+<var>${path}</var>
+<arg>${download_path}</arg>
+<arg>${batch}[download_timeout_seconds]</arg>
+<status status="PASS" start="2026-11-25T14:34:05.945725" elapsed="1.131811"/>
+</kw>
+<kw name="Check Demo Statement" owner="py_reframework.portal_support">
+<msg time="2026-11-25T14:34:07.077536" level="INFO">${valid} = True</msg>
+<var>${valid}</var>
+<arg>${path}</arg>
+<arg>${transaction}[start_date]</arg>
+<arg>${transaction}[end_date]</arg>
+<doc>Return whether the demo download contains the requested date range.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="not ${valid}">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</kw>
+<kw name="Close Portal Session">
+<status status="NOT RUN" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>session_ready=${False}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=system_failure</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Downloaded statement does not contain the requested date range.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</if>
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-11-25T14:34:07.077536" level="INFO">${result} = {'status': 'success', 'download_path': 'C:\\Users\\mario\\Documents\\Projects\\py-reframework\\process\\output\\runs\\2026-11-25_14-33-45\\downloads\\statement-002.txt', 'error': ''}</msg>
+<var>${result}</var>
+<arg>status=success</arg>
+<arg>download_path=${path}</arg>
+<arg>error=${EMPTY}</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="PASS" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:07.077536" level="INFO">${result} = {'status': 'success', 'download_path': 'C:\\Users\\mario\\Documents\\Projects\\py-reframework\\process\\output\\runs\\2026-11-25_14-33-45\\downloads\\statement-002.txt', 'error': ''}</msg>
+<var>${result}</var>
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:05.841615" elapsed="1.235921"/>
+</kw>
+<if>
+<branch type="IF" condition="$result[&quot;status&quot;] == &quot;retryable&quot;">
+<if>
+<branch type="IF" condition="${attempt} &lt; ${maximum_attempts}">
+<kw name="Log" owner="BuiltIn">
+<arg>Portal returned HTTP ${result}[http_status]; retrying after ${batch}[retry_delay_seconds] seconds.</arg>
+<arg>console=${True}</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<arg>${batch}[retry_delay_seconds] seconds</arg>
+<doc>Pauses execution for the given time.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</kw>
+<continue>
+<status status="NOT RUN" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</continue>
+<status status="NOT RUN" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</if>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${result}</arg>
+<arg>status=system_failure</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</if>
+<status status="PASS" start="2026-11-25T14:34:05.841615" elapsed="1.235921"/>
+</branch>
+<branch type="EXCEPT">
+<if>
+<branch type="IF" condition="${BROWSER_OPEN}">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</if>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=system_failure</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Non-retryable system failure; see Robot log.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</kw>
+<kw name="Record Transaction Outcome">
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<arg>${result}</arg>
+<arg>${attempt}</arg>
+<status status="NOT RUN" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</kw>
+<kw name="Fail" owner="BuiltIn">
+<arg>Non-retryable system failure; see Robot log and results CSV.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:05.841615" elapsed="1.235921"/>
+</try>
+<kw name="Record Transaction Outcome">
+<kw name="Record Transaction Result" owner="py_reframework.transactions">
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${result}[status]</arg>
+<arg>download_path=${result}[download_path]</arg>
+<arg>error=${result}[error]</arg>
+<arg>attempts=${attempt}</arg>
+<doc>Append one completed transaction to the results CSV.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="$result[&quot;status&quot;] == &quot;success&quot;">
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:34:07.077536" level="INFO">${count} = 2</msg>
+<var>${count}</var>
+<arg>$state["successes"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.077536" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>successes=${count}</arg>
+<arg>consecutive_failures=${0}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.077536" elapsed="0.008489"/>
+</kw>
+<status status="PASS" start="2026-11-25T14:34:07.077536" elapsed="0.008489"/>
+</branch>
+<branch type="ELSE IF" condition="$result[&quot;status&quot;] == &quot;business_failure&quot;">
+<kw name="Evaluate" owner="BuiltIn">
+<var>${count}</var>
+<arg>$state["business_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.086025" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>business_failures=${count}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.086025" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:07.086025" elapsed="0.002330"/>
+</branch>
+<branch type="ELSE">
+<kw name="Evaluate" owner="BuiltIn">
+<var>${count}</var>
+<arg>$state["system_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.088355" elapsed="0.000000"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${consecutive}</var>
+<arg>$state["consecutive_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.088355" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>system_failures=${count}</arg>
+<arg>consecutive_failures=${consecutive}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.089644" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:07.088355" elapsed="0.001289"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:07.077536" elapsed="0.012108"/>
+</if>
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<arg>${result}</arg>
+<arg>${attempt}</arg>
+<status status="PASS" start="2026-11-25T14:34:07.077536" elapsed="0.012108"/>
+</kw>
+<return>
+<status status="PASS" start="2026-11-25T14:34:07.089644" elapsed="0.000000"/>
+</return>
+<var name="${index}">0</var>
+<status status="PASS" start="2026-11-25T14:34:05.839604" elapsed="1.250040"/>
+</iter>
+<var>${index}</var>
+<value>${maximum_attempts}</value>
+<status status="PASS" start="2026-11-25T14:34:05.835182" elapsed="1.254462"/>
+</for>
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:05.835182" elapsed="1.254462"/>
+</kw>
+<kw name="Stop If Too Many System Failures">
+<if>
+<branch type="IF" condition="${state}[consecutive_failures] &gt;= ${OUTAGE_THRESHOLD}">
+<kw name="Fail" owner="BuiltIn">
+<arg>Stopped after ${state}[consecutive_failures] consecutive system failures; see results CSV.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.089644" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:07.089644" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:07.089644" elapsed="0.000000"/>
+</if>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:07.089644" elapsed="0.000000"/>
+</kw>
+<var name="${transaction}">{'transaction_id': 'period-002', 'start_date': '2025-02-01', 'end_date': '2025-02-28', 'error': ''}</var>
+<status status="PASS" start="2026-11-25T14:34:05.834412" elapsed="1.255232"/>
+</iter>
+<iter>
+<kw name="Process Transaction With Recovery">
+<if>
+<branch type="IF" condition="$transaction[&quot;error&quot;]">
+<kw name="Record Transaction Result" owner="py_reframework.transactions">
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>business_failure</arg>
+<arg>error=${transaction}[error]</arg>
+<arg>attempts=${0}</arg>
+<doc>Append one completed transaction to the results CSV.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.089644" elapsed="0.000000"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${count}</var>
+<arg>$state["business_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.089644" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>business_failures=${count}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.089644" elapsed="0.000000"/>
+</kw>
+<return>
+<status status="NOT RUN" start="2026-11-25T14:34:07.089644" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:07.089644" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:07.089644" elapsed="0.000000"/>
+</if>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:34:07.094057" level="INFO">${maximum_attempts} = 2</msg>
+<var>${maximum_attempts}</var>
+<arg>$batch["max_retries"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.089644" elapsed="0.004413"/>
+</kw>
+<for flavor="IN RANGE">
+<iter>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:34:07.094057" level="INFO">${attempt} = 1</msg>
+<var>${attempt}</var>
+<arg>$index + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</kw>
+<try>
+<branch type="TRY">
+<kw name="Process Statement Attempt">
+<kw name="Ensure Portal Session">
+<if>
+<branch type="IF" condition="$state[&quot;session_ready&quot;]">
+<return>
+<value>${None}</value>
+<status status="PASS" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</return>
+<status status="PASS" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</if>
+<kw name="Load Portal Credentials" owner="py_reframework.portal_support">
+<arg>${CONFIG_FILE}</arg>
+<doc>Make the portal credentials available to the login keyword.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</kw>
+<kw name="Open Demo Portal" owner="demo_portal">
+<var>${http_status}</var>
+<arg>${batch}[portal_url]</arg>
+<arg>${batch}[demo_delay_seconds]</arg>
+<status status="NOT RUN" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="$http_status in (502, 503, 504)">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</kw>
+<kw name="Close Portal Session">
+<status status="NOT RUN" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${http_status}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</if>
+<if>
+<branch type="IF" condition="${http_status} &lt; 200 or ${http_status} &gt;= 400">
+<kw name="Fail" owner="BuiltIn">
+<arg>Portal returned non-retryable HTTP status ${http_status}.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</if>
+<kw name="Log In To Demo Portal" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</kw>
+<kw name="Open Banking Page" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>session_ready=${True}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${None}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:07.094057" level="INFO">${temporary_status} = None</msg>
+<var>${temporary_status}</var>
+<arg>${batch}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="$temporary_status is not None">
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=retryable</arg>
+<arg>http_status=${temporary_status}</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Portal returned temporary HTTP ${temporary_status}; retries exhausted.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:07.094057" elapsed="0.000000"/>
+</if>
+<kw name="Apply Demo Date Range" owner="demo_portal">
+<kw name="Fill Text" owner="Browser">
+<msg time="2026-11-25T14:34:07.094057" level="INFO">Fills the text '2025-03-01' in the given field.</msg>
+<arg>data-testid=start-date</arg>
+<arg>${start_date}</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears and fills the given ``txt`` into the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.094057" elapsed="0.012963"/>
+</kw>
+<kw name="Fill Text" owner="Browser">
+<msg time="2026-11-25T14:34:07.107020" level="INFO">Fills the text '' in the given field.</msg>
+<arg>data-testid=end-date</arg>
+<arg>${end_date}</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears and fills the given ``txt`` into the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.107020" elapsed="0.003228"/>
+</kw>
+<kw name="Get Element States" owner="Browser">
+<msg time="2026-11-25T14:34:07.126501" level="INFO">States are: ['attached', 'visible', 'disabled', 'readonly', 'defocused']</msg>
+<msg time="2026-11-25T14:34:07.126501" level="INFO">${states} = ['attached', 'visible', 'disabled', 'readonly', 'defocused']</msg>
+<var>${states}</var>
+<arg>data-testid=apply-date-range</arg>
+<tag>Assertion</tag>
+<tag>Getter</tag>
+<tag>PageContent</tag>
+<doc>Get the active states from the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.110248" elapsed="0.016253"/>
+</kw>
+<if>
+<branch type="IF" condition="not $start_date or not $end_date">
+<if>
+<branch type="IF" condition="'disabled' not in $states">
+<kw name="Fail" owner="BuiltIn">
+<arg>Apply Range is unexpectedly enabled for an incomplete date range.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.126501" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:07.126501" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:07.126501" elapsed="0.000000"/>
+</if>
+<kw name="Clear Demo Dates" owner="demo_portal">
+<kw name="Clear Text" owner="Browser">
+<arg>data-testid=start-date</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.126501" elapsed="0.010087"/>
+</kw>
+<kw name="Clear Text" owner="Browser">
+<arg>data-testid=end-date</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.136588" elapsed="0.006349"/>
+</kw>
+<status status="PASS" start="2026-11-25T14:34:07.126501" elapsed="0.016436"/>
+</kw>
+<return>
+<value>${False}</value>
+<status status="PASS" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</return>
+<status status="PASS" start="2026-11-25T14:34:07.126501" elapsed="0.016436"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:07.126501" elapsed="0.016436"/>
+</if>
+<if>
+<branch type="IF" condition="'disabled' in $states">
+<kw name="Fail" owner="BuiltIn">
+<arg>Apply Range is unexpectedly disabled for a complete date range.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</if>
+<kw name="Click" owner="Browser">
+<arg>data-testid=apply-date-range</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Simulates mouse click on the element found by ``selector``.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</kw>
+<kw name="Wait For Elements State" owner="Browser">
+<arg>data-testid=date-range-display</arg>
+<arg>visible</arg>
+<tag>PageContent</tag>
+<tag>Wait</tag>
+<doc>Waits for the element found by ``selector`` to satisfy state option.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</kw>
+<kw name="Get Text" owner="Browser">
+<var>${selected}</var>
+<arg>data-testid=date-range-display</arg>
+<tag>Assertion</tag>
+<tag>Getter</tag>
+<tag>PageContent</tag>
+<doc>Returns text attribute of the element found by ``selector``.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</kw>
+<kw name="Should Match Regexp" owner="BuiltIn">
+<arg>${selected}</arg>
+<arg>^Selected: ${start_date} to ${end_date} \\(-?\\d+ days\\)$</arg>
+<doc>Fails if the `string` does not match the regular expression `pattern`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${True}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:07.142937" level="INFO">${applied} = False</msg>
+<var>${applied}</var>
+<arg>${transaction}[start_date]</arg>
+<arg>${transaction}[end_date]</arg>
+<status status="PASS" start="2026-11-25T14:34:07.094057" elapsed="0.048880"/>
+</kw>
+<if>
+<branch type="IF" condition="not ${applied}">
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-11-25T14:34:07.142937" level="INFO">${result} = {'status': 'business_failure', 'download_path': '', 'error': 'Apply Range was disabled because a date was missing.'}</msg>
+<var>${result}</var>
+<arg>status=business_failure</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Apply Range was disabled because a date was missing.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="PASS" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</return>
+<status status="PASS" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</if>
+<kw name="Reserve Batch Statement Path" owner="py_reframework.transactions">
+<var>${download_path}</var>
+<arg>${batch}</arg>
+<status status="NOT RUN" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</kw>
+<kw name="Download Demo Statement" owner="demo_portal">
+<var>${path}</var>
+<arg>${download_path}</arg>
+<arg>${batch}[download_timeout_seconds]</arg>
+<status status="NOT RUN" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</kw>
+<kw name="Check Demo Statement" owner="py_reframework.portal_support">
+<var>${valid}</var>
+<arg>${path}</arg>
+<arg>${transaction}[start_date]</arg>
+<arg>${transaction}[end_date]</arg>
+<doc>Return whether the demo download contains the requested date range.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="not ${valid}">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</kw>
+<kw name="Close Portal Session">
+<status status="NOT RUN" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>session_ready=${False}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=system_failure</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Downloaded statement does not contain the requested date range.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</if>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=success</arg>
+<arg>download_path=${path}</arg>
+<arg>error=${EMPTY}</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.142937" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:07.142937" elapsed="0.008106"/>
+</return>
+<msg time="2026-11-25T14:34:07.151043" level="INFO">${result} = {'status': 'business_failure', 'download_path': '', 'error': 'Apply Range was disabled because a date was missing.'}</msg>
+<var>${result}</var>
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:07.094057" elapsed="0.056986"/>
+</kw>
+<if>
+<branch type="IF" condition="$result[&quot;status&quot;] == &quot;retryable&quot;">
+<if>
+<branch type="IF" condition="${attempt} &lt; ${maximum_attempts}">
+<kw name="Log" owner="BuiltIn">
+<arg>Portal returned HTTP ${result}[http_status]; retrying after ${batch}[retry_delay_seconds] seconds.</arg>
+<arg>console=${True}</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.151043" elapsed="0.000000"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<arg>${batch}[retry_delay_seconds] seconds</arg>
+<doc>Pauses execution for the given time.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.151043" elapsed="0.000000"/>
+</kw>
+<continue>
+<status status="NOT RUN" start="2026-11-25T14:34:07.151043" elapsed="0.000000"/>
+</continue>
+<status status="NOT RUN" start="2026-11-25T14:34:07.151043" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:07.151043" elapsed="0.000000"/>
+</if>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${result}</arg>
+<arg>status=system_failure</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.151043" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:07.151043" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:07.151043" elapsed="0.000000"/>
+</if>
+<status status="PASS" start="2026-11-25T14:34:07.094057" elapsed="0.056986"/>
+</branch>
+<branch type="EXCEPT">
+<if>
+<branch type="IF" condition="${BROWSER_OPEN}">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:07.151043" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:07.151043" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:07.151043" elapsed="0.000000"/>
+</if>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=system_failure</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Non-retryable system failure; see Robot log.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.153060" elapsed="0.000000"/>
+</kw>
+<kw name="Record Transaction Outcome">
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<arg>${result}</arg>
+<arg>${attempt}</arg>
+<status status="NOT RUN" start="2026-11-25T14:34:07.153060" elapsed="0.000477"/>
+</kw>
+<kw name="Fail" owner="BuiltIn">
+<arg>Non-retryable system failure; see Robot log and results CSV.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.153537" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:07.151043" elapsed="0.002494"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:07.094057" elapsed="0.059480"/>
+</try>
+<kw name="Record Transaction Outcome">
+<kw name="Record Transaction Result" owner="py_reframework.transactions">
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${result}[status]</arg>
+<arg>download_path=${result}[download_path]</arg>
+<arg>error=${result}[error]</arg>
+<arg>attempts=${attempt}</arg>
+<doc>Append one completed transaction to the results CSV.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.153537" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="$result[&quot;status&quot;] == &quot;success&quot;">
+<kw name="Evaluate" owner="BuiltIn">
+<var>${count}</var>
+<arg>$state["successes"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.153537" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>successes=${count}</arg>
+<arg>consecutive_failures=${0}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.153537" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:07.153537" elapsed="0.000000"/>
+</branch>
+<branch type="ELSE IF" condition="$result[&quot;status&quot;] == &quot;business_failure&quot;">
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:34:07.153537" level="INFO">${count} = 1</msg>
+<var>${count}</var>
+<arg>$state["business_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.153537" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>business_failures=${count}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.153537" elapsed="0.000000"/>
+</kw>
+<status status="PASS" start="2026-11-25T14:34:07.153537" elapsed="0.000000"/>
+</branch>
+<branch type="ELSE">
+<kw name="Evaluate" owner="BuiltIn">
+<var>${count}</var>
+<arg>$state["system_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.153537" elapsed="0.000000"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${consecutive}</var>
+<arg>$state["consecutive_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.153537" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>system_failures=${count}</arg>
+<arg>consecutive_failures=${consecutive}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.153537" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:07.153537" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:07.153537" elapsed="0.000000"/>
+</if>
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<arg>${result}</arg>
+<arg>${attempt}</arg>
+<status status="PASS" start="2026-11-25T14:34:07.153537" elapsed="0.000000"/>
+</kw>
+<return>
+<status status="PASS" start="2026-11-25T14:34:07.153537" elapsed="0.000000"/>
+</return>
+<var name="${index}">0</var>
+<status status="PASS" start="2026-11-25T14:34:07.094057" elapsed="0.059480"/>
+</iter>
+<var>${index}</var>
+<value>${maximum_attempts}</value>
+<status status="PASS" start="2026-11-25T14:34:07.094057" elapsed="0.059480"/>
+</for>
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:07.089644" elapsed="0.063893"/>
+</kw>
+<kw name="Stop If Too Many System Failures">
+<if>
+<branch type="IF" condition="${state}[consecutive_failures] &gt;= ${OUTAGE_THRESHOLD}">
+<kw name="Fail" owner="BuiltIn">
+<arg>Stopped after ${state}[consecutive_failures] consecutive system failures; see results CSV.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.159054" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:07.159054" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:07.159054" elapsed="0.000000"/>
+</if>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:07.153537" elapsed="0.005517"/>
+</kw>
+<var name="${transaction}">{'transaction_id': 'period-invalid', 'start_date': '2025-03-01', 'end_date': '', 'error': ''}</var>
+<status status="PASS" start="2026-11-25T14:34:07.089644" elapsed="0.069410"/>
+</iter>
+<iter>
+<kw name="Process Transaction With Recovery">
+<if>
+<branch type="IF" condition="$transaction[&quot;error&quot;]">
+<kw name="Record Transaction Result" owner="py_reframework.transactions">
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>business_failure</arg>
+<arg>error=${transaction}[error]</arg>
+<arg>attempts=${0}</arg>
+<doc>Append one completed transaction to the results CSV.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.160754" elapsed="0.000000"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${count}</var>
+<arg>$state["business_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.160754" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>business_failures=${count}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.160754" elapsed="0.000000"/>
+</kw>
+<return>
+<status status="NOT RUN" start="2026-11-25T14:34:07.160754" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:07.159054" elapsed="0.001700"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:07.159054" elapsed="0.001700"/>
+</if>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:34:07.160754" level="INFO">${maximum_attempts} = 2</msg>
+<var>${maximum_attempts}</var>
+<arg>$batch["max_retries"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.160754" elapsed="0.000000"/>
+</kw>
+<for flavor="IN RANGE">
+<iter>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:34:07.162763" level="INFO">${attempt} = 1</msg>
+<var>${attempt}</var>
+<arg>$index + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.160754" elapsed="0.002009"/>
+</kw>
+<try>
+<branch type="TRY">
+<kw name="Process Statement Attempt">
+<kw name="Ensure Portal Session">
+<if>
+<branch type="IF" condition="$state[&quot;session_ready&quot;]">
+<return>
+<value>${None}</value>
+<status status="PASS" start="2026-11-25T14:34:07.162763" elapsed="0.000000"/>
+</return>
+<status status="PASS" start="2026-11-25T14:34:07.162763" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:07.162763" elapsed="0.000000"/>
+</if>
+<kw name="Load Portal Credentials" owner="py_reframework.portal_support">
+<arg>${CONFIG_FILE}</arg>
+<doc>Make the portal credentials available to the login keyword.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.162763" elapsed="0.000000"/>
+</kw>
+<kw name="Open Demo Portal" owner="demo_portal">
+<var>${http_status}</var>
+<arg>${batch}[portal_url]</arg>
+<arg>${batch}[demo_delay_seconds]</arg>
+<status status="NOT RUN" start="2026-11-25T14:34:07.162763" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="$http_status in (502, 503, 504)">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:07.162763" elapsed="0.000000"/>
+</kw>
+<kw name="Close Portal Session">
+<status status="NOT RUN" start="2026-11-25T14:34:07.162763" elapsed="0.002007"/>
+</kw>
+<return>
+<value>${http_status}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:07.164770" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:07.162763" elapsed="0.002007"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:07.162763" elapsed="0.002007"/>
+</if>
+<if>
+<branch type="IF" condition="${http_status} &lt; 200 or ${http_status} &gt;= 400">
+<kw name="Fail" owner="BuiltIn">
+<arg>Portal returned non-retryable HTTP status ${http_status}.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.164770" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:07.164770" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:07.164770" elapsed="0.000000"/>
+</if>
+<kw name="Log In To Demo Portal" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:07.164770" elapsed="0.000000"/>
+</kw>
+<kw name="Open Banking Page" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:07.164770" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>session_ready=${True}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.164770" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${None}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:07.164770" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:07.164770" level="INFO">${temporary_status} = None</msg>
+<var>${temporary_status}</var>
+<arg>${batch}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:07.162763" elapsed="0.002007"/>
+</kw>
+<if>
+<branch type="IF" condition="$temporary_status is not None">
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=retryable</arg>
+<arg>http_status=${temporary_status}</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Portal returned temporary HTTP ${temporary_status}; retries exhausted.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.164770" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:07.164770" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:07.164770" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:07.164770" elapsed="0.000000"/>
+</if>
+<kw name="Apply Demo Date Range" owner="demo_portal">
+<kw name="Fill Text" owner="Browser">
+<msg time="2026-11-25T14:34:07.166778" level="INFO">Fills the text '2025-04-01' in the given field.</msg>
+<arg>data-testid=start-date</arg>
+<arg>${start_date}</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears and fills the given ``txt`` into the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.166778" elapsed="0.001423"/>
+</kw>
+<kw name="Fill Text" owner="Browser">
+<msg time="2026-11-25T14:34:07.174954" level="INFO">Fills the text '2025-04-30' in the given field.</msg>
+<arg>data-testid=end-date</arg>
+<arg>${end_date}</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears and fills the given ``txt`` into the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.168201" elapsed="0.006753"/>
+</kw>
+<kw name="Get Element States" owner="Browser">
+<msg time="2026-11-25T14:34:07.191449" level="INFO">States are: ['attached', 'visible', 'enabled', 'defocused']</msg>
+<msg time="2026-11-25T14:34:07.191449" level="INFO">${states} = ['attached', 'visible', 'enabled', 'defocused']</msg>
+<var>${states}</var>
+<arg>data-testid=apply-date-range</arg>
+<tag>Assertion</tag>
+<tag>Getter</tag>
+<tag>PageContent</tag>
+<doc>Get the active states from the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.174954" elapsed="0.016495"/>
+</kw>
+<if>
+<branch type="IF" condition="not $start_date or not $end_date">
+<if>
+<branch type="IF" condition="'disabled' not in $states">
+<kw name="Fail" owner="BuiltIn">
+<arg>Apply Range is unexpectedly enabled for an incomplete date range.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.199582" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:07.191449" elapsed="0.008133"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:07.191449" elapsed="0.008133"/>
+</if>
+<kw name="Clear Demo Dates" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:07.199582" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${False}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:07.199582" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:07.191449" elapsed="0.008133"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:07.191449" elapsed="0.008133"/>
+</if>
+<if>
+<branch type="IF" condition="'disabled' in $states">
+<kw name="Fail" owner="BuiltIn">
+<arg>Apply Range is unexpectedly disabled for a complete date range.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.199582" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:07.199582" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:07.199582" elapsed="0.000000"/>
+</if>
+<kw name="Click" owner="Browser">
+<msg time="2026-11-25T14:34:07.201064" level="INFO">Clicks the element 'data-testid=apply-date-range'.</msg>
+<arg>data-testid=apply-date-range</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Simulates mouse click on the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.199582" elapsed="0.033868"/>
+</kw>
+<kw name="Wait For Elements State" owner="Browser">
+<msg time="2026-11-25T14:34:07.240044" level="INFO">Waited for Element with selector data-testid=date-range-display at state visible</msg>
+<arg>data-testid=date-range-display</arg>
+<arg>visible</arg>
+<tag>PageContent</tag>
+<tag>Wait</tag>
+<doc>Waits for the element found by ``selector`` to satisfy state option.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.233450" elapsed="0.006594"/>
+</kw>
+<kw name="Get Text" owner="Browser">
+<msg time="2026-11-25T14:34:07.250192" level="INFO">Text: ['Selected: 2025-04-01 to 2025-04-30 (29 days)']</msg>
+<msg time="2026-11-25T14:34:07.250192" level="INFO">${selected} = Selected: 2025-04-01 to 2025-04-30 (29 days)</msg>
+<var>${selected}</var>
+<arg>data-testid=date-range-display</arg>
+<tag>Assertion</tag>
+<tag>Getter</tag>
+<tag>PageContent</tag>
+<doc>Returns text attribute of the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.240044" elapsed="0.010148"/>
+</kw>
+<kw name="Should Match Regexp" owner="BuiltIn">
+<arg>${selected}</arg>
+<arg>^Selected: ${start_date} to ${end_date} \\(-?\\d+ days\\)$</arg>
+<doc>Fails if the `string` does not match the regular expression `pattern`.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.250192" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${True}</value>
+<status status="PASS" start="2026-11-25T14:34:07.250192" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:07.250192" level="INFO">${applied} = True</msg>
+<var>${applied}</var>
+<arg>${transaction}[start_date]</arg>
+<arg>${transaction}[end_date]</arg>
+<status status="PASS" start="2026-11-25T14:34:07.164770" elapsed="0.085422"/>
+</kw>
+<if>
+<branch type="IF" condition="not ${applied}">
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=business_failure</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Apply Range was disabled because a date was missing.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:07.250192" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:07.250192" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:07.250192" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:07.250192" elapsed="0.000000"/>
+</if>
+<kw name="Reserve Batch Statement Path" owner="py_reframework.transactions">
+<msg time="2026-11-25T14:34:07.252729" level="INFO">${download_path} = C:\Users\mario\Documents\Projects\py-reframework\process\output\runs\2026-11-25_14-33-45\downloads\statement-003.txt</msg>
+<var>${download_path}</var>
+<arg>${batch}</arg>
+<status status="PASS" start="2026-11-25T14:34:07.252729" elapsed="0.000000"/>
+</kw>
+<kw name="Download Demo Statement" owner="demo_portal">
+<kw name="Promise To Wait For Download" owner="Browser">
+<msg time="2026-11-25T14:34:07.252729" level="INFO">${download} = &lt;Future at 0x212f565f910 state=pending&gt;</msg>
+<var>${download}</var>
+<arg>${download_path}</arg>
+<arg>download_timeout=${timeout_seconds} seconds</arg>
+<tag>BrowserControl</tag>
+<tag>Wait</tag>
+<doc>Returns a promise that waits for the next download event on the page.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.252729" elapsed="0.000000"/>
+</kw>
+<kw name="Click" owner="Browser">
+<msg time="2026-11-25T14:34:07.256297" level="INFO">Clicks the element 'data-testid=download-statement'.</msg>
+<arg>data-testid=download-statement</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Simulates mouse click on the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.252729" elapsed="0.029670"/>
+</kw>
+<kw name="Wait For" owner="Browser">
+<msg time="2026-11-25T14:34:08.349001" level="INFO">${result} = {'saveAs': 'C:\\Users\\mario\\Documents\\Projects\\py-reframework\\process\\output\\runs\\2026-11-25_14-33-45\\downloads\\statement-003.txt', 'suggestedFilename': 'statement.txt', 'state': 'finished',...</msg>
+<var>${result}</var>
+<arg>${download}</arg>
+<tag>Wait</tag>
+<doc>Waits for promises to finish and returns results from them.</doc>
+<status status="PASS" start="2026-11-25T14:34:07.282399" elapsed="1.066602"/>
+</kw>
+<kw name="Should Be Equal" owner="BuiltIn">
+<arg>${result}[state]</arg>
+<arg>finished</arg>
+<doc>Fails if the given objects are unequal.</doc>
+<status status="PASS" start="2026-11-25T14:34:08.349656" elapsed="0.000000"/>
+</kw>
+<kw name="Clear Demo Dates" owner="demo_portal">
+<kw name="Clear Text" owner="Browser">
+<arg>data-testid=start-date</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:08.349656" elapsed="0.010543"/>
+</kw>
+<kw name="Clear Text" owner="Browser">
+<arg>data-testid=end-date</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:08.360199" elapsed="0.007382"/>
+</kw>
+<status status="PASS" start="2026-11-25T14:34:08.349656" elapsed="0.017925"/>
+</kw>
+<return>
+<value>${result}[saveAs]</value>
+<status status="PASS" start="2026-11-25T14:34:08.367581" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:08.370674" level="INFO">${path} = C:\Users\mario\Documents\Projects\py-reframework\process\output\runs\2026-11-25_14-33-45\downloads\statement-003.txt</msg>
+<var>${path}</var>
+<arg>${download_path}</arg>
+<arg>${batch}[download_timeout_seconds]</arg>
+<status status="PASS" start="2026-11-25T14:34:07.252729" elapsed="1.117945"/>
+</kw>
+<kw name="Check Demo Statement" owner="py_reframework.portal_support">
+<msg time="2026-11-25T14:34:08.370674" level="INFO">${valid} = True</msg>
+<var>${valid}</var>
+<arg>${path}</arg>
+<arg>${transaction}[start_date]</arg>
+<arg>${transaction}[end_date]</arg>
+<doc>Return whether the demo download contains the requested date range.</doc>
+<status status="PASS" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="not ${valid}">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</kw>
+<kw name="Close Portal Session">
+<status status="NOT RUN" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>session_ready=${False}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=system_failure</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Downloaded statement does not contain the requested date range.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</if>
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-11-25T14:34:08.370674" level="INFO">${result} = {'status': 'success', 'download_path': 'C:\\Users\\mario\\Documents\\Projects\\py-reframework\\process\\output\\runs\\2026-11-25_14-33-45\\downloads\\statement-003.txt', 'error': ''}</msg>
+<var>${result}</var>
+<arg>status=success</arg>
+<arg>download_path=${path}</arg>
+<arg>error=${EMPTY}</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="PASS" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="PASS" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:08.370674" level="INFO">${result} = {'status': 'success', 'download_path': 'C:\\Users\\mario\\Documents\\Projects\\py-reframework\\process\\output\\runs\\2026-11-25_14-33-45\\downloads\\statement-003.txt', 'error': ''}</msg>
+<var>${result}</var>
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:07.162763" elapsed="1.207911"/>
+</kw>
+<if>
+<branch type="IF" condition="$result[&quot;status&quot;] == &quot;retryable&quot;">
+<if>
+<branch type="IF" condition="${attempt} &lt; ${maximum_attempts}">
+<kw name="Log" owner="BuiltIn">
+<arg>Portal returned HTTP ${result}[http_status]; retrying after ${batch}[retry_delay_seconds] seconds.</arg>
+<arg>console=${True}</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<arg>${batch}[retry_delay_seconds] seconds</arg>
+<doc>Pauses execution for the given time.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</kw>
+<continue>
+<status status="NOT RUN" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</continue>
+<status status="NOT RUN" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</if>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${result}</arg>
+<arg>status=system_failure</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</if>
+<status status="PASS" start="2026-11-25T14:34:07.162763" elapsed="1.207911"/>
+</branch>
+<branch type="EXCEPT">
+<if>
+<branch type="IF" condition="${BROWSER_OPEN}">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</if>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=system_failure</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Non-retryable system failure; see Robot log.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</kw>
+<kw name="Record Transaction Outcome">
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<arg>${result}</arg>
+<arg>${attempt}</arg>
+<status status="NOT RUN" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</kw>
+<kw name="Fail" owner="BuiltIn">
+<arg>Non-retryable system failure; see Robot log and results CSV.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:08.370674" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:07.162763" elapsed="1.207911"/>
+</try>
+<kw name="Record Transaction Outcome">
+<kw name="Record Transaction Result" owner="py_reframework.transactions">
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${result}[status]</arg>
+<arg>download_path=${result}[download_path]</arg>
+<arg>error=${result}[error]</arg>
+<arg>attempts=${attempt}</arg>
+<doc>Append one completed transaction to the results CSV.</doc>
+<status status="PASS" start="2026-11-25T14:34:08.377915" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="$result[&quot;status&quot;] == &quot;success&quot;">
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:34:08.378924" level="INFO">${count} = 3</msg>
+<var>${count}</var>
+<arg>$state["successes"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>successes=${count}</arg>
+<arg>consecutive_failures=${0}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="PASS" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</kw>
+<status status="PASS" start="2026-11-25T14:34:08.377915" elapsed="0.001009"/>
+</branch>
+<branch type="ELSE IF" condition="$result[&quot;status&quot;] == &quot;business_failure&quot;">
+<kw name="Evaluate" owner="BuiltIn">
+<var>${count}</var>
+<arg>$state["business_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>business_failures=${count}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</branch>
+<branch type="ELSE">
+<kw name="Evaluate" owner="BuiltIn">
+<var>${count}</var>
+<arg>$state["system_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${consecutive}</var>
+<arg>$state["consecutive_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>system_failures=${count}</arg>
+<arg>consecutive_failures=${consecutive}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:08.377915" elapsed="0.001009"/>
+</if>
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<arg>${result}</arg>
+<arg>${attempt}</arg>
+<status status="PASS" start="2026-11-25T14:34:08.370674" elapsed="0.008250"/>
+</kw>
+<return>
+<status status="PASS" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</return>
+<var name="${index}">0</var>
+<status status="PASS" start="2026-11-25T14:34:07.160754" elapsed="1.218170"/>
+</iter>
+<var>${index}</var>
+<value>${maximum_attempts}</value>
+<status status="PASS" start="2026-11-25T14:34:07.160754" elapsed="1.218170"/>
+</for>
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:07.159054" elapsed="1.219870"/>
+</kw>
+<kw name="Stop If Too Many System Failures">
+<if>
+<branch type="IF" condition="${state}[consecutive_failures] &gt;= ${OUTAGE_THRESHOLD}">
+<kw name="Fail" owner="BuiltIn">
+<arg>Stopped after ${state}[consecutive_failures] consecutive system failures; see results CSV.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</if>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</kw>
+<var name="${transaction}">{'transaction_id': 'period-003', 'start_date': '2025-04-01', 'end_date': '2025-04-30', 'error': ''}</var>
+<status status="PASS" start="2026-11-25T14:34:07.159054" elapsed="1.219870"/>
+</iter>
+<iter>
+<kw name="Process Transaction With Recovery">
+<if>
+<branch type="IF" condition="$transaction[&quot;error&quot;]">
+<kw name="Record Transaction Result" owner="py_reframework.transactions">
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>business_failure</arg>
+<arg>error=${transaction}[error]</arg>
+<arg>attempts=${0}</arg>
+<doc>Append one completed transaction to the results CSV.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${count}</var>
+<arg>$state["business_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>business_failures=${count}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</kw>
+<return>
+<status status="NOT RUN" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</if>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:34:08.378924" level="INFO">${maximum_attempts} = 2</msg>
+<var>${maximum_attempts}</var>
+<arg>$batch["max_retries"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</kw>
+<for flavor="IN RANGE">
+<iter>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:34:08.378924" level="INFO">${attempt} = 1</msg>
+<var>${attempt}</var>
+<arg>$index + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:34:08.378924" elapsed="0.000000"/>
+</kw>
+<try>
+<branch type="TRY">
+<kw name="Process Statement Attempt">
+<kw name="Ensure Portal Session">
+<if>
+<branch type="IF" condition="$state[&quot;session_ready&quot;]">
+<return>
+<value>${None}</value>
+<status status="PASS" start="2026-11-25T14:34:08.389401" elapsed="0.002020"/>
+</return>
+<status status="PASS" start="2026-11-25T14:34:08.389401" elapsed="0.002020"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:08.389401" elapsed="0.002020"/>
+</if>
+<kw name="Load Portal Credentials" owner="py_reframework.portal_support">
+<arg>${CONFIG_FILE}</arg>
+<doc>Make the portal credentials available to the login keyword.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.391421" elapsed="0.001174"/>
+</kw>
+<kw name="Open Demo Portal" owner="demo_portal">
+<var>${http_status}</var>
+<arg>${batch}[portal_url]</arg>
+<arg>${batch}[demo_delay_seconds]</arg>
+<status status="NOT RUN" start="2026-11-25T14:34:08.392595" elapsed="0.001010"/>
+</kw>
+<if>
+<branch type="IF" condition="$http_status in (502, 503, 504)">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:08.393605" elapsed="0.000000"/>
+</kw>
+<kw name="Close Portal Session">
+<status status="NOT RUN" start="2026-11-25T14:34:08.395370" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${http_status}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:08.395370" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:08.393605" elapsed="0.001765"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:08.393605" elapsed="0.001765"/>
+</if>
+<if>
+<branch type="IF" condition="${http_status} &lt; 200 or ${http_status} &gt;= 400">
+<kw name="Fail" owner="BuiltIn">
+<arg>Portal returned non-retryable HTTP status ${http_status}.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.395370" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:08.395370" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:08.395370" elapsed="0.000000"/>
+</if>
+<kw name="Log In To Demo Portal" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:08.395370" elapsed="0.002012"/>
+</kw>
+<kw name="Open Banking Page" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:08.397382" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>session_ready=${True}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.397382" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${None}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:08.397382" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:08.397382" level="INFO">${temporary_status} = None</msg>
+<var>${temporary_status}</var>
+<arg>${batch}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:08.387156" elapsed="0.010226"/>
+</kw>
+<if>
+<branch type="IF" condition="$temporary_status is not None">
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=retryable</arg>
+<arg>http_status=${temporary_status}</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Portal returned temporary HTTP ${temporary_status}; retries exhausted.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.399397" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:08.399397" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:08.397382" elapsed="0.002015"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:08.397382" elapsed="0.002015"/>
+</if>
+<kw name="Apply Demo Date Range" owner="demo_portal">
+<kw name="Fill Text" owner="Browser">
+<msg time="2026-11-25T14:34:08.403421" level="INFO">Fills the text '2025-05-01' in the given field.</msg>
+<arg>data-testid=start-date</arg>
+<arg>${start_date}</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears and fills the given ``txt`` into the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:08.401409" elapsed="0.014255"/>
+</kw>
+<kw name="Fill Text" owner="Browser">
+<msg time="2026-11-25T14:34:08.415664" level="INFO">Fills the text '2025-05-31' in the given field.</msg>
+<arg>data-testid=end-date</arg>
+<arg>${end_date}</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears and fills the given ``txt`` into the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:08.415664" elapsed="0.014274"/>
+</kw>
+<kw name="Get Element States" owner="Browser">
+<msg time="2026-11-25T14:34:08.454124" level="INFO">States are: ['attached', 'visible', 'enabled', 'defocused']</msg>
+<msg time="2026-11-25T14:34:08.454124" level="INFO">${states} = ['attached', 'visible', 'enabled', 'defocused']</msg>
+<var>${states}</var>
+<arg>data-testid=apply-date-range</arg>
+<tag>Assertion</tag>
+<tag>Getter</tag>
+<tag>PageContent</tag>
+<doc>Get the active states from the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:08.429938" elapsed="0.024186"/>
+</kw>
+<if>
+<branch type="IF" condition="not $start_date or not $end_date">
+<if>
+<branch type="IF" condition="'disabled' not in $states">
+<kw name="Fail" owner="BuiltIn">
+<arg>Apply Range is unexpectedly enabled for an incomplete date range.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.454124" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:08.454124" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:08.454124" elapsed="0.000000"/>
+</if>
+<kw name="Clear Demo Dates" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:08.454124" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${False}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:08.454124" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:08.454124" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:08.454124" elapsed="0.000000"/>
+</if>
+<if>
+<branch type="IF" condition="'disabled' in $states">
+<kw name="Fail" owner="BuiltIn">
+<arg>Apply Range is unexpectedly disabled for a complete date range.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.457369" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:08.454124" elapsed="0.003245"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:08.454124" elapsed="0.003245"/>
+</if>
+<kw name="Click" owner="Browser">
+<msg time="2026-11-25T14:34:08.457369" level="INFO">Clicks the element 'data-testid=apply-date-range'.</msg>
+<arg>data-testid=apply-date-range</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Simulates mouse click on the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:08.457369" elapsed="0.033591"/>
+</kw>
+<kw name="Wait For Elements State" owner="Browser">
+<msg time="2026-11-25T14:34:08.493924" level="INFO">Waited for Element with selector data-testid=date-range-display at state visible</msg>
+<arg>data-testid=date-range-display</arg>
+<arg>visible</arg>
+<tag>PageContent</tag>
+<tag>Wait</tag>
+<doc>Waits for the element found by ``selector`` to satisfy state option.</doc>
+<status status="PASS" start="2026-11-25T14:34:08.490960" elapsed="0.002964"/>
+</kw>
+<kw name="Get Text" owner="Browser">
+<msg time="2026-11-25T14:34:08.506721" level="INFO">Text: ['Selected: 2025-05-01 to 2025-05-31 (30 days)']</msg>
+<msg time="2026-11-25T14:34:08.506721" level="INFO">${selected} = Selected: 2025-05-01 to 2025-05-31 (30 days)</msg>
+<var>${selected}</var>
+<arg>data-testid=date-range-display</arg>
+<tag>Assertion</tag>
+<tag>Getter</tag>
+<tag>PageContent</tag>
+<doc>Returns text attribute of the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:08.493924" elapsed="0.012797"/>
+</kw>
+<kw name="Should Match Regexp" owner="BuiltIn">
+<arg>${selected}</arg>
+<arg>^Selected: ${start_date} to ${end_date} \\(-?\\d+ days\\)$</arg>
+<doc>Fails if the `string` does not match the regular expression `pattern`.</doc>
+<status status="PASS" start="2026-11-25T14:34:08.506721" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${True}</value>
+<status status="PASS" start="2026-11-25T14:34:08.506721" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:08.506721" level="INFO">${applied} = True</msg>
+<var>${applied}</var>
+<arg>${transaction}[start_date]</arg>
+<arg>${transaction}[end_date]</arg>
+<status status="PASS" start="2026-11-25T14:34:08.399397" elapsed="0.107324"/>
+</kw>
+<if>
+<branch type="IF" condition="not ${applied}">
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=business_failure</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Apply Range was disabled because a date was missing.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:08.510478" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:08.510478" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:08.510478" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:08.510478" elapsed="0.000000"/>
+</if>
+<kw name="Reserve Batch Statement Path" owner="py_reframework.transactions">
+<msg time="2026-11-25T14:34:08.510478" level="INFO">${download_path} = C:\Users\mario\Documents\Projects\py-reframework\process\output\runs\2026-11-25_14-33-45\downloads\statement-004.txt</msg>
+<var>${download_path}</var>
+<arg>${batch}</arg>
+<status status="PASS" start="2026-11-25T14:34:08.510478" elapsed="0.000000"/>
+</kw>
+<kw name="Download Demo Statement" owner="demo_portal">
+<kw name="Promise To Wait For Download" owner="Browser">
+<msg time="2026-11-25T14:34:08.510478" level="INFO">${download} = &lt;Future at 0x212f5682950 state=pending&gt;</msg>
+<var>${download}</var>
+<arg>${download_path}</arg>
+<arg>download_timeout=${timeout_seconds} seconds</arg>
+<tag>BrowserControl</tag>
+<tag>Wait</tag>
+<doc>Returns a promise that waits for the next download event on the page.</doc>
+<status status="PASS" start="2026-11-25T14:34:08.510478" elapsed="0.000000"/>
+</kw>
+<kw name="Click" owner="Browser">
+<msg time="2026-11-25T14:34:08.510478" level="INFO">Clicks the element 'data-testid=download-statement'.</msg>
+<arg>data-testid=download-statement</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Simulates mouse click on the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:08.510478" elapsed="0.047880"/>
+</kw>
+<kw name="Wait For" owner="Browser">
+<msg time="2026-11-25T14:34:09.623213" level="INFO">${result} = {'saveAs': 'C:\\Users\\mario\\Documents\\Projects\\py-reframework\\process\\output\\runs\\2026-11-25_14-33-45\\downloads\\statement-004.txt', 'suggestedFilename': 'statement.txt', 'state': 'finished',...</msg>
+<var>${result}</var>
+<arg>${download}</arg>
+<tag>Wait</tag>
+<doc>Waits for promises to finish and returns results from them.</doc>
+<status status="PASS" start="2026-11-25T14:34:08.558358" elapsed="1.064855"/>
+</kw>
+<kw name="Should Be Equal" owner="BuiltIn">
+<arg>${result}[state]</arg>
+<arg>finished</arg>
+<doc>Fails if the given objects are unequal.</doc>
+<status status="PASS" start="2026-11-25T14:34:09.623517" elapsed="0.000000"/>
+</kw>
+<kw name="Clear Demo Dates" owner="demo_portal">
+<kw name="Clear Text" owner="Browser">
+<arg>data-testid=start-date</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:09.623517" elapsed="0.006035"/>
+</kw>
+<kw name="Clear Text" owner="Browser">
+<arg>data-testid=end-date</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:09.629552" elapsed="0.012216"/>
+</kw>
+<status status="PASS" start="2026-11-25T14:34:09.623517" elapsed="0.018251"/>
+</kw>
+<return>
+<value>${result}[saveAs]</value>
+<status status="PASS" start="2026-11-25T14:34:09.641768" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:09.641768" level="INFO">${path} = C:\Users\mario\Documents\Projects\py-reframework\process\output\runs\2026-11-25_14-33-45\downloads\statement-004.txt</msg>
+<var>${path}</var>
+<arg>${download_path}</arg>
+<arg>${batch}[download_timeout_seconds]</arg>
+<status status="PASS" start="2026-11-25T14:34:08.510478" elapsed="1.131290"/>
+</kw>
+<kw name="Check Demo Statement" owner="py_reframework.portal_support">
+<msg time="2026-11-25T14:34:09.643507" level="INFO">${valid} = True</msg>
+<var>${valid}</var>
+<arg>${path}</arg>
+<arg>${transaction}[start_date]</arg>
+<arg>${transaction}[end_date]</arg>
+<doc>Return whether the demo download contains the requested date range.</doc>
+<status status="PASS" start="2026-11-25T14:34:09.641768" elapsed="0.001739"/>
+</kw>
+<if>
+<branch type="IF" condition="not ${valid}">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</kw>
+<kw name="Close Portal Session">
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>session_ready=${False}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=system_failure</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Downloaded statement does not contain the requested date range.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</if>
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-11-25T14:34:09.643507" level="INFO">${result} = {'status': 'success', 'download_path': 'C:\\Users\\mario\\Documents\\Projects\\py-reframework\\process\\output\\runs\\2026-11-25_14-33-45\\downloads\\statement-004.txt', 'error': ''}</msg>
+<var>${result}</var>
+<arg>status=success</arg>
+<arg>download_path=${path}</arg>
+<arg>error=${EMPTY}</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="PASS" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="PASS" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:09.643507" level="INFO">${result} = {'status': 'success', 'download_path': 'C:\\Users\\mario\\Documents\\Projects\\py-reframework\\process\\output\\runs\\2026-11-25_14-33-45\\downloads\\statement-004.txt', 'error': ''}</msg>
+<var>${result}</var>
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:08.378924" elapsed="1.264583"/>
+</kw>
+<if>
+<branch type="IF" condition="$result[&quot;status&quot;] == &quot;retryable&quot;">
+<if>
+<branch type="IF" condition="${attempt} &lt; ${maximum_attempts}">
+<kw name="Log" owner="BuiltIn">
+<arg>Portal returned HTTP ${result}[http_status]; retrying after ${batch}[retry_delay_seconds] seconds.</arg>
+<arg>console=${True}</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<arg>${batch}[retry_delay_seconds] seconds</arg>
+<doc>Pauses execution for the given time.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</kw>
+<continue>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</continue>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</if>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${result}</arg>
+<arg>status=system_failure</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</if>
+<status status="PASS" start="2026-11-25T14:34:08.378924" elapsed="1.264583"/>
+</branch>
+<branch type="EXCEPT">
+<if>
+<branch type="IF" condition="${BROWSER_OPEN}">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</if>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=system_failure</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Non-retryable system failure; see Robot log.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</kw>
+<kw name="Record Transaction Outcome">
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<arg>${result}</arg>
+<arg>${attempt}</arg>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</kw>
+<kw name="Fail" owner="BuiltIn">
+<arg>Non-retryable system failure; see Robot log and results CSV.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:08.378924" elapsed="1.264583"/>
+</try>
+<kw name="Record Transaction Outcome">
+<kw name="Record Transaction Result" owner="py_reframework.transactions">
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${result}[status]</arg>
+<arg>download_path=${result}[download_path]</arg>
+<arg>error=${result}[error]</arg>
+<arg>attempts=${attempt}</arg>
+<doc>Append one completed transaction to the results CSV.</doc>
+<status status="PASS" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="$result[&quot;status&quot;] == &quot;success&quot;">
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:34:09.643507" level="INFO">${count} = 4</msg>
+<var>${count}</var>
+<arg>$state["successes"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>successes=${count}</arg>
+<arg>consecutive_failures=${0}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="PASS" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</kw>
+<status status="PASS" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</branch>
+<branch type="ELSE IF" condition="$result[&quot;status&quot;] == &quot;business_failure&quot;">
+<kw name="Evaluate" owner="BuiltIn">
+<var>${count}</var>
+<arg>$state["business_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>business_failures=${count}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</branch>
+<branch type="ELSE">
+<kw name="Evaluate" owner="BuiltIn">
+<var>${count}</var>
+<arg>$state["system_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${consecutive}</var>
+<arg>$state["consecutive_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>system_failures=${count}</arg>
+<arg>consecutive_failures=${consecutive}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.651754" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:09.643507" elapsed="0.008247"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:09.643507" elapsed="0.008247"/>
+</if>
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<arg>${result}</arg>
+<arg>${attempt}</arg>
+<status status="PASS" start="2026-11-25T14:34:09.643507" elapsed="0.008247"/>
+</kw>
+<return>
+<status status="PASS" start="2026-11-25T14:34:09.651754" elapsed="0.000000"/>
+</return>
+<var name="${index}">0</var>
+<status status="PASS" start="2026-11-25T14:34:08.378924" elapsed="1.272830"/>
+</iter>
+<var>${index}</var>
+<value>${maximum_attempts}</value>
+<status status="PASS" start="2026-11-25T14:34:08.378924" elapsed="1.272830"/>
+</for>
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:08.378924" elapsed="1.272830"/>
+</kw>
+<kw name="Stop If Too Many System Failures">
+<if>
+<branch type="IF" condition="${state}[consecutive_failures] &gt;= ${OUTAGE_THRESHOLD}">
+<kw name="Fail" owner="BuiltIn">
+<arg>Stopped after ${state}[consecutive_failures] consecutive system failures; see results CSV.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.651754" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:09.651754" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:09.651754" elapsed="0.000000"/>
+</if>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:09.651754" elapsed="0.000000"/>
+</kw>
+<var name="${transaction}">{'transaction_id': 'period-004', 'start_date': '2025-05-01', 'end_date': '2025-05-31', 'error': ''}</var>
+<status status="PASS" start="2026-11-25T14:34:08.378924" elapsed="1.272830"/>
+</iter>
+<iter>
+<kw name="Process Transaction With Recovery">
+<if>
+<branch type="IF" condition="$transaction[&quot;error&quot;]">
+<kw name="Record Transaction Result" owner="py_reframework.transactions">
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>business_failure</arg>
+<arg>error=${transaction}[error]</arg>
+<arg>attempts=${0}</arg>
+<doc>Append one completed transaction to the results CSV.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.656343" elapsed="0.000000"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${count}</var>
+<arg>$state["business_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.656343" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>business_failures=${count}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.656343" elapsed="0.000000"/>
+</kw>
+<return>
+<status status="NOT RUN" start="2026-11-25T14:34:09.656343" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:09.654302" elapsed="0.002041"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:09.654302" elapsed="0.002041"/>
+</if>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:34:09.656343" level="INFO">${maximum_attempts} = 2</msg>
+<var>${maximum_attempts}</var>
+<arg>$batch["max_retries"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:34:09.656343" elapsed="0.000000"/>
+</kw>
+<for flavor="IN RANGE">
+<iter>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:34:09.656343" level="INFO">${attempt} = 1</msg>
+<var>${attempt}</var>
+<arg>$index + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:34:09.656343" elapsed="0.000000"/>
+</kw>
+<try>
+<branch type="TRY">
+<kw name="Process Statement Attempt">
+<kw name="Ensure Portal Session">
+<if>
+<branch type="IF" condition="$state[&quot;session_ready&quot;]">
+<return>
+<value>${None}</value>
+<status status="PASS" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</return>
+<status status="PASS" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</if>
+<kw name="Load Portal Credentials" owner="py_reframework.portal_support">
+<arg>${CONFIG_FILE}</arg>
+<doc>Make the portal credentials available to the login keyword.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</kw>
+<kw name="Open Demo Portal" owner="demo_portal">
+<var>${http_status}</var>
+<arg>${batch}[portal_url]</arg>
+<arg>${batch}[demo_delay_seconds]</arg>
+<status status="NOT RUN" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="$http_status in (502, 503, 504)">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</kw>
+<kw name="Close Portal Session">
+<status status="NOT RUN" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${http_status}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</if>
+<if>
+<branch type="IF" condition="${http_status} &lt; 200 or ${http_status} &gt;= 400">
+<kw name="Fail" owner="BuiltIn">
+<arg>Portal returned non-retryable HTTP status ${http_status}.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</if>
+<kw name="Log In To Demo Portal" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</kw>
+<kw name="Open Banking Page" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>session_ready=${True}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${None}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:09.659802" level="INFO">${temporary_status} = None</msg>
+<var>${temporary_status}</var>
+<arg>${batch}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="$temporary_status is not None">
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=retryable</arg>
+<arg>http_status=${temporary_status}</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Portal returned temporary HTTP ${temporary_status}; retries exhausted.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:09.659802" elapsed="0.000000"/>
+</if>
+<kw name="Apply Demo Date Range" owner="demo_portal">
+<kw name="Fill Text" owner="Browser">
+<msg time="2026-11-25T14:34:09.659802" level="INFO">Fills the text '2025-06-01' in the given field.</msg>
+<arg>data-testid=start-date</arg>
+<arg>${start_date}</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears and fills the given ``txt`` into the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:09.659802" elapsed="0.008116"/>
+</kw>
+<kw name="Fill Text" owner="Browser">
+<msg time="2026-11-25T14:34:09.671787" level="INFO">Fills the text '2025-06-30' in the given field.</msg>
+<arg>data-testid=end-date</arg>
+<arg>${end_date}</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears and fills the given ``txt`` into the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:09.667918" elapsed="0.010746"/>
+</kw>
+<kw name="Get Element States" owner="Browser">
+<msg time="2026-11-25T14:34:09.692368" level="INFO">States are: ['attached', 'visible', 'enabled', 'defocused']</msg>
+<msg time="2026-11-25T14:34:09.692368" level="INFO">${states} = ['attached', 'visible', 'enabled', 'defocused']</msg>
+<var>${states}</var>
+<arg>data-testid=apply-date-range</arg>
+<tag>Assertion</tag>
+<tag>Getter</tag>
+<tag>PageContent</tag>
+<doc>Get the active states from the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:09.678664" elapsed="0.013704"/>
+</kw>
+<if>
+<branch type="IF" condition="not $start_date or not $end_date">
+<if>
+<branch type="IF" condition="'disabled' not in $states">
+<kw name="Fail" owner="BuiltIn">
+<arg>Apply Range is unexpectedly enabled for an incomplete date range.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.692368" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:09.692368" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:09.692368" elapsed="0.000000"/>
+</if>
+<kw name="Clear Demo Dates" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:09.692368" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${False}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:09.692368" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:09.692368" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:09.692368" elapsed="0.000000"/>
+</if>
+<if>
+<branch type="IF" condition="'disabled' in $states">
+<kw name="Fail" owner="BuiltIn">
+<arg>Apply Range is unexpectedly disabled for a complete date range.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.698653" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:09.692368" elapsed="0.006285"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:09.692368" elapsed="0.006285"/>
+</if>
+<kw name="Click" owner="Browser">
+<msg time="2026-11-25T14:34:09.698653" level="INFO">Clicks the element 'data-testid=apply-date-range'.</msg>
+<arg>data-testid=apply-date-range</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Simulates mouse click on the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:09.698653" elapsed="0.035999"/>
+</kw>
+<kw name="Wait For Elements State" owner="Browser">
+<msg time="2026-11-25T14:34:09.741333" level="INFO">Waited for Element with selector data-testid=date-range-display at state visible</msg>
+<arg>data-testid=date-range-display</arg>
+<arg>visible</arg>
+<tag>PageContent</tag>
+<tag>Wait</tag>
+<doc>Waits for the element found by ``selector`` to satisfy state option.</doc>
+<status status="PASS" start="2026-11-25T14:34:09.734652" elapsed="0.006681"/>
+</kw>
+<kw name="Get Text" owner="Browser">
+<msg time="2026-11-25T14:34:09.751741" level="INFO">Text: ['Selected: 2025-06-01 to 2025-06-30 (29 days)']</msg>
+<msg time="2026-11-25T14:34:09.751741" level="INFO">${selected} = Selected: 2025-06-01 to 2025-06-30 (29 days)</msg>
+<var>${selected}</var>
+<arg>data-testid=date-range-display</arg>
+<tag>Assertion</tag>
+<tag>Getter</tag>
+<tag>PageContent</tag>
+<doc>Returns text attribute of the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:09.741333" elapsed="0.010408"/>
+</kw>
+<kw name="Should Match Regexp" owner="BuiltIn">
+<arg>${selected}</arg>
+<arg>^Selected: ${start_date} to ${end_date} \\(-?\\d+ days\\)$</arg>
+<doc>Fails if the `string` does not match the regular expression `pattern`.</doc>
+<status status="PASS" start="2026-11-25T14:34:09.751741" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${True}</value>
+<status status="PASS" start="2026-11-25T14:34:09.751741" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:09.751741" level="INFO">${applied} = True</msg>
+<var>${applied}</var>
+<arg>${transaction}[start_date]</arg>
+<arg>${transaction}[end_date]</arg>
+<status status="PASS" start="2026-11-25T14:34:09.659802" elapsed="0.091939"/>
+</kw>
+<if>
+<branch type="IF" condition="not ${applied}">
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=business_failure</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Apply Range was disabled because a date was missing.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:09.751741" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:09.751741" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:09.751741" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:09.751741" elapsed="0.000000"/>
+</if>
+<kw name="Reserve Batch Statement Path" owner="py_reframework.transactions">
+<msg time="2026-11-25T14:34:09.751741" level="INFO">${download_path} = C:\Users\mario\Documents\Projects\py-reframework\process\output\runs\2026-11-25_14-33-45\downloads\statement-005.txt</msg>
+<var>${download_path}</var>
+<arg>${batch}</arg>
+<status status="PASS" start="2026-11-25T14:34:09.751741" elapsed="0.000000"/>
+</kw>
+<kw name="Download Demo Statement" owner="demo_portal">
+<kw name="Promise To Wait For Download" owner="Browser">
+<msg time="2026-11-25T14:34:09.751741" level="INFO">${download} = &lt;Future at 0x212f565c710 state=pending&gt;</msg>
+<var>${download}</var>
+<arg>${download_path}</arg>
+<arg>download_timeout=${timeout_seconds} seconds</arg>
+<tag>BrowserControl</tag>
+<tag>Wait</tag>
+<doc>Returns a promise that waits for the next download event on the page.</doc>
+<status status="PASS" start="2026-11-25T14:34:09.751741" elapsed="0.000000"/>
+</kw>
+<kw name="Click" owner="Browser">
+<msg time="2026-11-25T14:34:09.757531" level="INFO">Clicks the element 'data-testid=download-statement'.</msg>
+<arg>data-testid=download-statement</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Simulates mouse click on the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:09.751741" elapsed="0.032640"/>
+</kw>
+<kw name="Wait For" owner="Browser">
+<msg time="2026-11-25T14:34:10.845949" level="INFO">${result} = {'saveAs': 'C:\\Users\\mario\\Documents\\Projects\\py-reframework\\process\\output\\runs\\2026-11-25_14-33-45\\downloads\\statement-005.txt', 'suggestedFilename': 'statement.txt', 'state': 'finished',...</msg>
+<var>${result}</var>
+<arg>${download}</arg>
+<tag>Wait</tag>
+<doc>Waits for promises to finish and returns results from them.</doc>
+<status status="PASS" start="2026-11-25T14:34:09.784381" elapsed="1.061568"/>
+</kw>
+<kw name="Should Be Equal" owner="BuiltIn">
+<arg>${result}[state]</arg>
+<arg>finished</arg>
+<doc>Fails if the given objects are unequal.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.845949" elapsed="0.000000"/>
+</kw>
+<kw name="Clear Demo Dates" owner="demo_portal">
+<kw name="Clear Text" owner="Browser">
+<arg>data-testid=start-date</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.845949" elapsed="0.013151"/>
+</kw>
+<kw name="Clear Text" owner="Browser">
+<arg>data-testid=end-date</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.859100" elapsed="0.003556"/>
+</kw>
+<status status="PASS" start="2026-11-25T14:34:10.845949" elapsed="0.016707"/>
+</kw>
+<return>
+<value>${result}[saveAs]</value>
+<status status="PASS" start="2026-11-25T14:34:10.862656" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:10.862656" level="INFO">${path} = C:\Users\mario\Documents\Projects\py-reframework\process\output\runs\2026-11-25_14-33-45\downloads\statement-005.txt</msg>
+<var>${path}</var>
+<arg>${download_path}</arg>
+<arg>${batch}[download_timeout_seconds]</arg>
+<status status="PASS" start="2026-11-25T14:34:09.751741" elapsed="1.110915"/>
+</kw>
+<kw name="Check Demo Statement" owner="py_reframework.portal_support">
+<msg time="2026-11-25T14:34:10.862656" level="INFO">${valid} = True</msg>
+<var>${valid}</var>
+<arg>${path}</arg>
+<arg>${transaction}[start_date]</arg>
+<arg>${transaction}[end_date]</arg>
+<doc>Return whether the demo download contains the requested date range.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.862656" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="not ${valid}">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:10.868543" elapsed="0.000000"/>
+</kw>
+<kw name="Close Portal Session">
+<status status="NOT RUN" start="2026-11-25T14:34:10.868543" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>session_ready=${False}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.868543" elapsed="0.000000"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=system_failure</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Downloaded statement does not contain the requested date range.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.868543" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:10.868543" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:10.868543" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:10.868543" elapsed="0.000000"/>
+</if>
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-11-25T14:34:10.871040" level="INFO">${result} = {'status': 'success', 'download_path': 'C:\\Users\\mario\\Documents\\Projects\\py-reframework\\process\\output\\runs\\2026-11-25_14-33-45\\downloads\\statement-005.txt', 'error': ''}</msg>
+<var>${result}</var>
+<arg>status=success</arg>
+<arg>download_path=${path}</arg>
+<arg>error=${EMPTY}</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.868543" elapsed="0.002497"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="PASS" start="2026-11-25T14:34:10.871040" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:10.871040" level="INFO">${result} = {'status': 'success', 'download_path': 'C:\\Users\\mario\\Documents\\Projects\\py-reframework\\process\\output\\runs\\2026-11-25_14-33-45\\downloads\\statement-005.txt', 'error': ''}</msg>
+<var>${result}</var>
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:09.656343" elapsed="1.214697"/>
+</kw>
+<if>
+<branch type="IF" condition="$result[&quot;status&quot;] == &quot;retryable&quot;">
+<if>
+<branch type="IF" condition="${attempt} &lt; ${maximum_attempts}">
+<kw name="Log" owner="BuiltIn">
+<arg>Portal returned HTTP ${result}[http_status]; retrying after ${batch}[retry_delay_seconds] seconds.</arg>
+<arg>console=${True}</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.871040" elapsed="0.000000"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<arg>${batch}[retry_delay_seconds] seconds</arg>
+<doc>Pauses execution for the given time.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.871040" elapsed="0.000000"/>
+</kw>
+<continue>
+<status status="NOT RUN" start="2026-11-25T14:34:10.871040" elapsed="0.000000"/>
+</continue>
+<status status="NOT RUN" start="2026-11-25T14:34:10.871040" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:10.871040" elapsed="0.000000"/>
+</if>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${result}</arg>
+<arg>status=system_failure</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.871040" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:10.871040" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:10.871040" elapsed="0.000000"/>
+</if>
+<status status="PASS" start="2026-11-25T14:34:09.656343" elapsed="1.214697"/>
+</branch>
+<branch type="EXCEPT">
+<if>
+<branch type="IF" condition="${BROWSER_OPEN}">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:10.871040" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:10.871040" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:10.871040" elapsed="0.000000"/>
+</if>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=system_failure</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Non-retryable system failure; see Robot log.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.871040" elapsed="0.000000"/>
+</kw>
+<kw name="Record Transaction Outcome">
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<arg>${result}</arg>
+<arg>${attempt}</arg>
+<status status="NOT RUN" start="2026-11-25T14:34:10.871040" elapsed="0.000000"/>
+</kw>
+<kw name="Fail" owner="BuiltIn">
+<arg>Non-retryable system failure; see Robot log and results CSV.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.871040" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:10.871040" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:09.656343" elapsed="1.214697"/>
+</try>
+<kw name="Record Transaction Outcome">
+<kw name="Record Transaction Result" owner="py_reframework.transactions">
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${result}[status]</arg>
+<arg>download_path=${result}[download_path]</arg>
+<arg>error=${result}[error]</arg>
+<arg>attempts=${attempt}</arg>
+<doc>Append one completed transaction to the results CSV.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.871040" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="$result[&quot;status&quot;] == &quot;success&quot;">
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:34:10.871040" level="INFO">${count} = 5</msg>
+<var>${count}</var>
+<arg>$state["successes"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.871040" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>successes=${count}</arg>
+<arg>consecutive_failures=${0}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.871040" elapsed="0.006643"/>
+</kw>
+<status status="PASS" start="2026-11-25T14:34:10.871040" elapsed="0.006643"/>
+</branch>
+<branch type="ELSE IF" condition="$result[&quot;status&quot;] == &quot;business_failure&quot;">
+<kw name="Evaluate" owner="BuiltIn">
+<var>${count}</var>
+<arg>$state["business_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.877683" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>business_failures=${count}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.877683" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:10.877683" elapsed="0.000000"/>
+</branch>
+<branch type="ELSE">
+<kw name="Evaluate" owner="BuiltIn">
+<var>${count}</var>
+<arg>$state["system_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.877683" elapsed="0.000000"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${consecutive}</var>
+<arg>$state["consecutive_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.877683" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>system_failures=${count}</arg>
+<arg>consecutive_failures=${consecutive}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.877683" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:10.877683" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:10.871040" elapsed="0.006643"/>
+</if>
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<arg>${result}</arg>
+<arg>${attempt}</arg>
+<status status="PASS" start="2026-11-25T14:34:10.871040" elapsed="0.006643"/>
+</kw>
+<return>
+<status status="PASS" start="2026-11-25T14:34:10.877683" elapsed="0.001507"/>
+</return>
+<var name="${index}">0</var>
+<status status="PASS" start="2026-11-25T14:34:09.656343" elapsed="1.222847"/>
+</iter>
+<var>${index}</var>
+<value>${maximum_attempts}</value>
+<status status="PASS" start="2026-11-25T14:34:09.656343" elapsed="1.222847"/>
+</for>
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:09.654302" elapsed="1.224888"/>
+</kw>
+<kw name="Stop If Too Many System Failures">
+<if>
+<branch type="IF" condition="${state}[consecutive_failures] &gt;= ${OUTAGE_THRESHOLD}">
+<kw name="Fail" owner="BuiltIn">
+<arg>Stopped after ${state}[consecutive_failures] consecutive system failures; see results CSV.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</if>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</kw>
+<var name="${transaction}">{'transaction_id': 'period-005', 'start_date': '2025-06-01', 'end_date': '2025-06-30', 'error': ''}</var>
+<status status="PASS" start="2026-11-25T14:34:09.654302" elapsed="1.224888"/>
+</iter>
+<iter>
+<kw name="Process Transaction With Recovery">
+<if>
+<branch type="IF" condition="$transaction[&quot;error&quot;]">
+<kw name="Record Transaction Result" owner="py_reframework.transactions">
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>business_failure</arg>
+<arg>error=${transaction}[error]</arg>
+<arg>attempts=${0}</arg>
+<doc>Append one completed transaction to the results CSV.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${count}</var>
+<arg>$state["business_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>business_failures=${count}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</kw>
+<return>
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</if>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:34:10.879190" level="INFO">${maximum_attempts} = 2</msg>
+<var>${maximum_attempts}</var>
+<arg>$batch["max_retries"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</kw>
+<for flavor="IN RANGE">
+<iter>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:34:10.879190" level="INFO">${attempt} = 1</msg>
+<var>${attempt}</var>
+<arg>$index + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</kw>
+<try>
+<branch type="TRY">
+<kw name="Process Statement Attempt">
+<kw name="Ensure Portal Session">
+<if>
+<branch type="IF" condition="$state[&quot;session_ready&quot;]">
+<return>
+<value>${None}</value>
+<status status="PASS" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</return>
+<status status="PASS" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</if>
+<kw name="Load Portal Credentials" owner="py_reframework.portal_support">
+<arg>${CONFIG_FILE}</arg>
+<doc>Make the portal credentials available to the login keyword.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</kw>
+<kw name="Open Demo Portal" owner="demo_portal">
+<var>${http_status}</var>
+<arg>${batch}[portal_url]</arg>
+<arg>${batch}[demo_delay_seconds]</arg>
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="$http_status in (502, 503, 504)">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</kw>
+<kw name="Close Portal Session">
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${http_status}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</if>
+<if>
+<branch type="IF" condition="${http_status} &lt; 200 or ${http_status} &gt;= 400">
+<kw name="Fail" owner="BuiltIn">
+<arg>Portal returned non-retryable HTTP status ${http_status}.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</if>
+<kw name="Log In To Demo Portal" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</kw>
+<kw name="Open Banking Page" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>session_ready=${True}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${None}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:10.879190" level="INFO">${temporary_status} = None</msg>
+<var>${temporary_status}</var>
+<arg>${batch}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="$temporary_status is not None">
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=retryable</arg>
+<arg>http_status=${temporary_status}</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Portal returned temporary HTTP ${temporary_status}; retries exhausted.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:10.879190" elapsed="0.000000"/>
+</if>
+<kw name="Apply Demo Date Range" owner="demo_portal">
+<kw name="Fill Text" owner="Browser">
+<msg time="2026-11-25T14:34:10.887332" level="INFO">Fills the text '' in the given field.</msg>
+<arg>data-testid=start-date</arg>
+<arg>${start_date}</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears and fills the given ``txt`` into the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.879190" elapsed="0.010290"/>
+</kw>
+<kw name="Fill Text" owner="Browser">
+<msg time="2026-11-25T14:34:10.895419" level="INFO">Fills the text '2025-07-31' in the given field.</msg>
+<arg>data-testid=end-date</arg>
+<arg>${end_date}</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears and fills the given ``txt`` into the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.889480" elapsed="0.005939"/>
+</kw>
+<kw name="Get Element States" owner="Browser">
+<msg time="2026-11-25T14:34:10.924388" level="INFO">States are: ['attached', 'visible', 'disabled', 'readonly', 'defocused']</msg>
+<msg time="2026-11-25T14:34:10.924388" level="INFO">${states} = ['attached', 'visible', 'disabled', 'readonly', 'defocused']</msg>
+<var>${states}</var>
+<arg>data-testid=apply-date-range</arg>
+<tag>Assertion</tag>
+<tag>Getter</tag>
+<tag>PageContent</tag>
+<doc>Get the active states from the element found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.895419" elapsed="0.028969"/>
+</kw>
+<if>
+<branch type="IF" condition="not $start_date or not $end_date">
+<if>
+<branch type="IF" condition="'disabled' not in $states">
+<kw name="Fail" owner="BuiltIn">
+<arg>Apply Range is unexpectedly enabled for an incomplete date range.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.924388" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:10.924388" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:10.924388" elapsed="0.000000"/>
+</if>
+<kw name="Clear Demo Dates" owner="demo_portal">
+<kw name="Clear Text" owner="Browser">
+<arg>data-testid=start-date</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.924388" elapsed="0.009654"/>
+</kw>
+<kw name="Clear Text" owner="Browser">
+<arg>data-testid=end-date</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Clears the text field found by ``selector``.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.934042" elapsed="0.011032"/>
+</kw>
+<status status="PASS" start="2026-11-25T14:34:10.924388" elapsed="0.020686"/>
+</kw>
+<return>
+<value>${False}</value>
+<status status="PASS" start="2026-11-25T14:34:10.945074" elapsed="0.000000"/>
+</return>
+<status status="PASS" start="2026-11-25T14:34:10.924388" elapsed="0.020686"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:10.924388" elapsed="0.020686"/>
+</if>
+<if>
+<branch type="IF" condition="'disabled' in $states">
+<kw name="Fail" owner="BuiltIn">
+<arg>Apply Range is unexpectedly disabled for a complete date range.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.945074" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:10.945074" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:10.945074" elapsed="0.000000"/>
+</if>
+<kw name="Click" owner="Browser">
+<arg>data-testid=apply-date-range</arg>
+<tag>PageContent</tag>
+<tag>Setter</tag>
+<doc>Simulates mouse click on the element found by ``selector``.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.945074" elapsed="0.003945"/>
+</kw>
+<kw name="Wait For Elements State" owner="Browser">
+<arg>data-testid=date-range-display</arg>
+<arg>visible</arg>
+<tag>PageContent</tag>
+<tag>Wait</tag>
+<doc>Waits for the element found by ``selector`` to satisfy state option.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.949019" elapsed="0.000000"/>
+</kw>
+<kw name="Get Text" owner="Browser">
+<var>${selected}</var>
+<arg>data-testid=date-range-display</arg>
+<tag>Assertion</tag>
+<tag>Getter</tag>
+<tag>PageContent</tag>
+<doc>Returns text attribute of the element found by ``selector``.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.949019" elapsed="0.000000"/>
+</kw>
+<kw name="Should Match Regexp" owner="BuiltIn">
+<arg>${selected}</arg>
+<arg>^Selected: ${start_date} to ${end_date} \\(-?\\d+ days\\)$</arg>
+<doc>Fails if the `string` does not match the regular expression `pattern`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.949019" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${True}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:10.949019" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:10.949019" level="INFO">${applied} = False</msg>
+<var>${applied}</var>
+<arg>${transaction}[start_date]</arg>
+<arg>${transaction}[end_date]</arg>
+<status status="PASS" start="2026-11-25T14:34:10.879190" elapsed="0.069829"/>
+</kw>
+<if>
+<branch type="IF" condition="not ${applied}">
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-11-25T14:34:10.951027" level="INFO">${result} = {'status': 'business_failure', 'download_path': '', 'error': 'Apply Range was disabled because a date was missing.'}</msg>
+<var>${result}</var>
+<arg>status=business_failure</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Apply Range was disabled because a date was missing.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.951027" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="PASS" start="2026-11-25T14:34:10.951027" elapsed="0.000000"/>
+</return>
+<status status="PASS" start="2026-11-25T14:34:10.949019" elapsed="0.002008"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:10.949019" elapsed="0.002008"/>
+</if>
+<kw name="Reserve Batch Statement Path" owner="py_reframework.transactions">
+<var>${download_path}</var>
+<arg>${batch}</arg>
+<status status="NOT RUN" start="2026-11-25T14:34:10.951027" elapsed="0.000000"/>
+</kw>
+<kw name="Download Demo Statement" owner="demo_portal">
+<var>${path}</var>
+<arg>${download_path}</arg>
+<arg>${batch}[download_timeout_seconds]</arg>
+<status status="NOT RUN" start="2026-11-25T14:34:10.951027" elapsed="0.000000"/>
+</kw>
+<kw name="Check Demo Statement" owner="py_reframework.portal_support">
+<var>${valid}</var>
+<arg>${path}</arg>
+<arg>${transaction}[start_date]</arg>
+<arg>${transaction}[end_date]</arg>
+<doc>Return whether the demo download contains the requested date range.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.951027" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="not ${valid}">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:10.953034" elapsed="0.000000"/>
+</kw>
+<kw name="Close Portal Session">
+<status status="NOT RUN" start="2026-11-25T14:34:10.953034" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>session_ready=${False}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.953034" elapsed="0.000000"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=system_failure</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Downloaded statement does not contain the requested date range.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.953034" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:10.953034" elapsed="0.000000"/>
+</return>
+<status status="NOT RUN" start="2026-11-25T14:34:10.953034" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:10.951027" elapsed="0.002007"/>
+</if>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=success</arg>
+<arg>download_path=${path}</arg>
+<arg>error=${EMPTY}</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.953034" elapsed="0.000000"/>
+</kw>
+<return>
+<value>${result}</value>
+<status status="NOT RUN" start="2026-11-25T14:34:10.953034" elapsed="0.000000"/>
+</return>
+<msg time="2026-11-25T14:34:10.955677" level="INFO">${result} = {'status': 'business_failure', 'download_path': '', 'error': 'Apply Range was disabled because a date was missing.'}</msg>
+<var>${result}</var>
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:10.879190" elapsed="0.076487"/>
+</kw>
+<if>
+<branch type="IF" condition="$result[&quot;status&quot;] == &quot;retryable&quot;">
+<if>
+<branch type="IF" condition="${attempt} &lt; ${maximum_attempts}">
+<kw name="Log" owner="BuiltIn">
+<arg>Portal returned HTTP ${result}[http_status]; retrying after ${batch}[retry_delay_seconds] seconds.</arg>
+<arg>console=${True}</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.955677" elapsed="0.000000"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<arg>${batch}[retry_delay_seconds] seconds</arg>
+<doc>Pauses execution for the given time.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.955677" elapsed="0.000000"/>
+</kw>
+<continue>
+<status status="NOT RUN" start="2026-11-25T14:34:10.958251" elapsed="0.000000"/>
+</continue>
+<status status="NOT RUN" start="2026-11-25T14:34:10.955677" elapsed="0.002574"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:10.955677" elapsed="0.002574"/>
+</if>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${result}</arg>
+<arg>status=system_failure</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.958632" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:10.955677" elapsed="0.002955"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:10.955677" elapsed="0.002955"/>
+</if>
+<status status="PASS" start="2026-11-25T14:34:10.879190" elapsed="0.079442"/>
+</branch>
+<branch type="EXCEPT">
+<if>
+<branch type="IF" condition="${BROWSER_OPEN}">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<status status="NOT RUN" start="2026-11-25T14:34:10.958632" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:10.958632" elapsed="0.000000"/>
+</branch>
+<status status="NOT RUN" start="2026-11-25T14:34:10.958632" elapsed="0.000000"/>
+</if>
+<kw name="Create Dictionary" owner="BuiltIn">
+<var>${result}</var>
+<arg>status=system_failure</arg>
+<arg>download_path=${EMPTY}</arg>
+<arg>error=Non-retryable system failure; see Robot log.</arg>
+<doc>Creates and returns a dictionary based on the given `items`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.958632" elapsed="0.000000"/>
+</kw>
+<kw name="Record Transaction Outcome">
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<arg>${result}</arg>
+<arg>${attempt}</arg>
+<status status="NOT RUN" start="2026-11-25T14:34:10.958632" elapsed="0.000000"/>
+</kw>
+<kw name="Fail" owner="BuiltIn">
+<arg>Non-retryable system failure; see Robot log and results CSV.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.958632" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:10.958632" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:10.879190" elapsed="0.079442"/>
+</try>
+<kw name="Record Transaction Outcome">
+<kw name="Record Transaction Result" owner="py_reframework.transactions">
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${result}[status]</arg>
+<arg>download_path=${result}[download_path]</arg>
+<arg>error=${result}[error]</arg>
+<arg>attempts=${attempt}</arg>
+<doc>Append one completed transaction to the results CSV.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.961079" elapsed="0.000000"/>
+</kw>
+<if>
+<branch type="IF" condition="$result[&quot;status&quot;] == &quot;success&quot;">
+<kw name="Evaluate" owner="BuiltIn">
+<var>${count}</var>
+<arg>$state["successes"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.961079" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>successes=${count}</arg>
+<arg>consecutive_failures=${0}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.961079" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:10.961079" elapsed="0.000000"/>
+</branch>
+<branch type="ELSE IF" condition="$result[&quot;status&quot;] == &quot;business_failure&quot;">
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-11-25T14:34:10.961079" level="INFO">${count} = 2</msg>
+<var>${count}</var>
+<arg>$state["business_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.961079" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>business_failures=${count}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.961079" elapsed="0.002941"/>
+</kw>
+<status status="PASS" start="2026-11-25T14:34:10.961079" elapsed="0.002941"/>
+</branch>
+<branch type="ELSE">
+<kw name="Evaluate" owner="BuiltIn">
+<var>${count}</var>
+<arg>$state["system_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.964020" elapsed="0.000000"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<var>${consecutive}</var>
+<arg>$state["consecutive_failures"] + 1</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.964020" elapsed="0.000000"/>
+</kw>
+<kw name="Set To Dictionary" owner="Collections">
+<arg>${state}</arg>
+<arg>system_failures=${count}</arg>
+<arg>consecutive_failures=${consecutive}</arg>
+<doc>Adds the given `key_value_pairs` and/or `items` to the `dictionary`.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.964020" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:10.964020" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:10.961079" elapsed="0.002941"/>
+</if>
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<arg>${result}</arg>
+<arg>${attempt}</arg>
+<status status="PASS" start="2026-11-25T14:34:10.958632" elapsed="0.005388"/>
+</kw>
+<return>
+<status status="PASS" start="2026-11-25T14:34:10.964020" elapsed="0.000000"/>
+</return>
+<var name="${index}">0</var>
+<status status="PASS" start="2026-11-25T14:34:10.879190" elapsed="0.084830"/>
+</iter>
+<var>${index}</var>
+<value>${maximum_attempts}</value>
+<status status="PASS" start="2026-11-25T14:34:10.879190" elapsed="0.084830"/>
+</for>
+<arg>${batch}</arg>
+<arg>${transaction}</arg>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:10.879190" elapsed="0.084830"/>
+</kw>
+<kw name="Stop If Too Many System Failures">
+<if>
+<branch type="IF" condition="${state}[consecutive_failures] &gt;= ${OUTAGE_THRESHOLD}">
+<kw name="Fail" owner="BuiltIn">
+<arg>Stopped after ${state}[consecutive_failures] consecutive system failures; see results CSV.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.964020" elapsed="0.002010"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:10.964020" elapsed="0.002010"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:10.964020" elapsed="0.002010"/>
+</if>
+<arg>${state}</arg>
+<status status="PASS" start="2026-11-25T14:34:10.964020" elapsed="0.002010"/>
+</kw>
+<var name="${transaction}">{'transaction_id': 'period-invalid-002', 'start_date': '', 'end_date': '2025-07-31', 'error': ''}</var>
+<status status="PASS" start="2026-11-25T14:34:10.879190" elapsed="0.086840"/>
+</iter>
+<var>${transaction}</var>
+<value>@{batch}[transactions]</value>
+<status status="PASS" start="2026-11-25T14:34:04.418853" elapsed="6.547177"/>
+</for>
+<kw name="Fail If Batch Has Failures">
+<if>
+<branch type="IF" condition="${state}[business_failures] &gt; 0 or ${state}[system_failures] &gt; 0">
+<kw name="Fail" owner="BuiltIn">
+<msg time="2026-11-25T14:34:10.966030" level="FAIL">One or more transactions failed; see results CSV.</msg>
+<arg>One or more transactions failed; see results CSV.</arg>
+<doc>Fails the test or task with the given message and optionally alters its tags.</doc>
+<status status="FAIL" start="2026-11-25T14:34:10.966030" elapsed="0.000000">One or more transactions failed; see results CSV.</status>
+</kw>
+<status status="FAIL" start="2026-11-25T14:34:10.966030" elapsed="0.000000">One or more transactions failed; see results CSV.</status>
+</branch>
+<status status="FAIL" start="2026-11-25T14:34:10.966030" elapsed="0.000000">One or more transactions failed; see results CSV.</status>
+</if>
+<arg>${state}</arg>
+<status status="FAIL" start="2026-11-25T14:34:10.966030" elapsed="0.000000">One or more transactions failed; see results CSV.</status>
+</kw>
+<kw name="Finish Batch" type="TEARDOWN">
+<if>
+<branch type="IF" condition="$RUN_STATE is not None">
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-11-25T14:34:10.968040" level="INFO">Summary: 5 succeeded, 2 business failures, 0 system failures.</msg>
+<arg>Summary: ${RUN_STATE}[successes] succeeded, ${RUN_STATE}[business_failures] business failures, ${RUN_STATE}[system_failures] system failures.</arg>
+<arg>console=${True}</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.968040" elapsed="0.000000"/>
+</kw>
+<status status="PASS" start="2026-11-25T14:34:10.968040" elapsed="0.000000"/>
+</branch>
+<branch type="ELSE">
+<kw name="Log" owner="BuiltIn">
+<arg>Summary unavailable: batch state was not initialized.</arg>
+<arg>WARN</arg>
+<arg>console=${True}</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="NOT RUN" start="2026-11-25T14:34:10.968040" elapsed="0.000000"/>
+</kw>
+<status status="NOT RUN" start="2026-11-25T14:34:10.968040" elapsed="0.000000"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:10.968040" elapsed="0.000000"/>
+</if>
+<kw name="Finish Browser Session" owner="demo_portal">
+<if>
+<branch type="IF" condition="${BROWSER_OPEN}">
+<kw name="Run Keyword If Test Failed" owner="BuiltIn">
+<kw name="Capture Failure Evidence" owner="demo_portal">
+<kw name="Run Keyword And Warn On Failure" owner="BuiltIn">
+<kw name="Take Screenshot" owner="Browser">
+<msg time="2026-11-25T14:34:11.012119" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="browser/screenshot/robotframework-browser-screenshot-1.png" target="_blank"&gt;&lt;img src="browser/screenshot/robotframework-browser-screenshot-1.png" style="max-width:800px;max-height:800px;"/&gt;&lt;/a&gt;</msg>
+<tag>PageContent</tag>
+<doc>Takes a screenshot of the current window or element and saves it to disk.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.969548" elapsed="0.042571"/>
+</kw>
+<arg>Take Screenshot</arg>
+<doc>Runs the specified keyword logs a warning if the keyword fails.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.969548" elapsed="0.042571"/>
+</kw>
+<status status="PASS" start="2026-11-25T14:34:10.969548" elapsed="0.042571"/>
+</kw>
+<arg>Capture Failure Evidence</arg>
+<doc>Runs the given keyword with the given arguments, if the test failed.</doc>
+<status status="PASS" start="2026-11-25T14:34:10.969548" elapsed="0.042571"/>
+</kw>
+<kw name="Close Browser" owner="Browser">
+<msg time="2026-11-25T14:34:11.078775" level="INFO">Closed all browsers</msg>
+<arg>ALL</arg>
+<tag>BrowserControl</tag>
+<tag>Setter</tag>
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2026-11-25T14:34:11.012119" elapsed="0.066656"/>
+</kw>
+<kw name="Set Suite Variable" owner="BuiltIn">
+<msg time="2026-11-25T14:34:11.085495" level="INFO">${BROWSER_OPEN} = False</msg>
+<arg>${BROWSER_OPEN}</arg>
+<arg>${False}</arg>
+<doc>Makes the variable available everywhere within the scope of the current suite.</doc>
+<status status="PASS" start="2026-11-25T14:34:11.078775" elapsed="0.006720"/>
+</kw>
+<status status="PASS" start="2026-11-25T14:34:10.969548" elapsed="0.115947"/>
+</branch>
+<status status="PASS" start="2026-11-25T14:34:10.968040" elapsed="0.117455"/>
+</if>
+<status status="PASS" start="2026-11-25T14:34:10.968040" elapsed="0.117455"/>
+</kw>
+<status status="PASS" start="2026-11-25T14:34:10.966030" elapsed="0.119465"/>
+</kw>
+<status status="FAIL" start="2026-11-25T14:33:45.782533" elapsed="25.302962">One or more transactions failed; see results CSV.</status>
+</test>
+<doc>Download a demo statement for each valid row in the input CSV.</doc>
+<status status="FAIL" start="2026-11-25T14:33:45.092856" elapsed="26.002316"/>
+</suite>
+<statistics>
+<total>
+<stat pass="0" fail="1" skip="0">All Tasks</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="Process Transactions" id="s1" pass="0" fail="1" skip="0">Process Transactions</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>

@@ -189,7 +189,7 @@ configuration remain at the repository root.
 | --- | --- | --- |
 | Overview | [README.md](../README.md) | Project introduction, diagrams, and scope. |
 | Guides | [Architecture](architecture.md), [setup and operation](setup-and-operation.md), [adaptation guide](adaptation-guide.md), [business use cases](use-cases.md) | Design, execution, adaptation, and business context. |
-| Demo evidence | [docs/demo-evidence/](demo-evidence/) | Recorded walkthrough of a run. |
+| Sample run output | [process/output/](../process/output/) | One committed run: results CSV, downloaded statements, Robot reports. |
 | Operator settings | [process/config.csv](../process/config.csv) | Runtime settings and portal credentials. |
 | Sample input | [process/input/transactions.csv](../process/input/transactions.csv) | Example date ranges, including two deliberately invalid rows. |
 | Robot orchestration | [code/robot/tasks/process_transactions.robot](../code/robot/tasks/process_transactions.robot), [code/robot/tasks/download_statement.robot](../code/robot/tasks/download_statement.robot) | Batch and individual-statement tasks. |
