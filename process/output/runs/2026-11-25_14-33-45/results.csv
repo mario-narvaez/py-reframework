@@ -1,0 +1,8 @@
+transaction_id,start_date,end_date,status,attempts,download_path,error
+period-001,2025-01-01,2025-01-31,success,1,C:\Users\mario\Documents\Projects\py-reframework\process\output\runs\2026-11-25_14-33-45\downloads\statement-001.txt,
+period-002,2025-02-01,2025-02-28,success,1,C:\Users\mario\Documents\Projects\py-reframework\process\output\runs\2026-11-25_14-33-45\downloads\statement-002.txt,
+period-invalid,2025-03-01,,business_failure,1,,Apply Range was disabled because a date was missing.
+period-003,2025-04-01,2025-04-30,success,1,C:\Users\mario\Documents\Projects\py-reframework\process\output\runs\2026-11-25_14-33-45\downloads\statement-003.txt,
+period-004,2025-05-01,2025-05-31,success,1,C:\Users\mario\Documents\Projects\py-reframework\process\output\runs\2026-11-25_14-33-45\downloads\statement-004.txt,
+period-005,2025-06-01,2025-06-30,success,1,C:\Users\mario\Documents\Projects\py-reframework\process\output\runs\2026-11-25_14-33-45\downloads\statement-005.txt,
+period-invalid-002,,2025-07-31,business_failure,1,,Apply Range was disabled because a date was missing.

@@ -1,0 +1,4 @@
+BANK STATEMENT
+Date Range: 2025-06-01 to 2025-06-30
+Account: 1234567890123456
+Transaction History would be here...

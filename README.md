@@ -26,8 +26,9 @@ the input alone is not enough.
 
 ## See it in action
 
-[Watch the three-minute walkthrough](docs/demo-evidence/py-reframework-walkthrough.mp4):
+[Watch the three-minute walkthrough](https://youtu.be/bZNKkWT-FmI):
 sample input, bot execution, downloaded statements, and the results CSV.
+A sample run is committed under [process/output/](process/output/).
 The sample includes two deliberately incomplete date ranges, which produce
 expected business failures.
 
